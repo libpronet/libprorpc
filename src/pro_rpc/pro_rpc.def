@@ -1,0 +1,9 @@
+LIBRARY    pro_rpc
+
+EXPORTS
+    CreateRpcClient
+    DeleteRpcClient
+    CreateRpcServer
+    DeleteRpcServer
+    CreateRpcRequest
+    CreateRpcResult

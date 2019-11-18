@@ -1,0 +1,778 @@
+/*
+ * Copyright (C) 2018-2019 Eric Tung <libpronet@gmail.com>
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"),
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ * This file is part of LibProRpc (https://github.com/libpronet/libprorpc)
+ */
+
+#include "rpc_client.h"
+#include "pro_rpc.h"
+#include "rpc_packet.h"
+#include "rpc_server.h"
+#include "promsg/msg_client.h"
+#include "pronet/pro_config_file.h"
+#include "pronet/pro_memory_pool.h"
+#include "pronet/pro_net.h"
+#include "pronet/pro_stl.h"
+#include "pronet/pro_thread_mutex.h"
+#include "pronet/pro_timer_factory.h"
+#include "pronet/pro_z.h"
+#include "pronet/rtp_base.h"
+#include "pronet/rtp_msg.h"
+#include <cassert>
+
+/////////////////////////////////////////////////////////////////////////////
+////
+
+static const RTP_MSG_USER RPC_ROOT_ID(1, 1, 0); /* 1-1 */
+static const RTP_MSG_USER RPC_USER_ID(2, 0, 0); /* 2-0 */
+
+/////////////////////////////////////////////////////////////////////////////
+////
+
+static
+void
+PRO_CALLTYPE
+ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
+             RPC_CLIENT_CONFIG_INFO&               configInfo)
+{
+    int       i = 0;
+    const int c = (int)configs.size();
+
+    for (; i < c; ++i)
+    {
+        const CProStlString& configName  = configs[i].configName;
+        const CProStlString& configValue = configs[i].configValue;
+
+        if (stricmp(configName.c_str(), "rpcc_pending_calls") == 0)
+        {
+            const int value = atoi(configValue.c_str());
+            if (value > 0)
+            {
+                configInfo.rpcc_pending_calls = value;
+            }
+        }
+        else if (stricmp(configName.c_str(), "rpcc_rpc_timeout") == 0)
+        {
+            const int value = atoi(configValue.c_str());
+            if (value > 0 && value <= 3600)
+            {
+                configInfo.rpcc_rpc_timeout = value;
+            }
+        }
+        else
+        {
+        }
+    } /* end of for (...) */
+}
+
+/////////////////////////////////////////////////////////////////////////////
+////
+
+CRpcClient*
+CRpcClient::CreateInstance()
+{
+    CRpcClient* const client = new CRpcClient;
+
+    return (client);
+}
+
+CRpcClient::CRpcClient()
+{
+    m_observer = NULL;
+    m_packet   = NULL;
+    m_clientId = 0;
+}
+
+CRpcClient::~CRpcClient()
+{
+    Fini();
+}
+
+bool
+CRpcClient::Init(IRpcClientObserver* observer,
+                 IProReactor*        reactor,
+                 const char*         configFileName,
+                 RTP_MM_TYPE         mmType,     /* = 0 */
+                 const char*         serverIp,   /* = NULL */
+                 unsigned short      serverPort, /* = 0 */
+                 const RTP_MSG_USER* user,       /* = NULL */
+                 const char*         password,   /* = NULL */
+                 const char*         localIp)    /* = NULL */
+{
+    assert(observer != NULL);
+    assert(reactor != NULL);
+    assert(configFileName != NULL);
+    assert(configFileName[0] != '\0');
+    if (observer == NULL || reactor == NULL || configFileName == NULL ||
+        configFileName[0] == '\0')
+    {
+        return (false);
+    }
+
+    char exeRoot[1024] = "";
+    ProGetExeDir_(exeRoot);
+
+    CProStlString configFileName2 = configFileName;
+    if (configFileName2[0] == '.' ||
+        configFileName2.find_first_of("\\/") == CProStlString::npos)
+    {
+        CProStlString fileName = exeRoot;
+        fileName += configFileName2;
+        configFileName2 = fileName;
+    }
+
+    CProConfigFile configFile;
+    configFile.Init(configFileName2.c_str());
+
+    CProStlVector<PRO_CONFIG_ITEM> configs;
+    if (!configFile.Read(configs))
+    {
+        return (false);
+    }
+
+    RPC_CLIENT_CONFIG_INFO configInfo;
+    ReadConfig_i(configs, configInfo);
+
+    CRpcPacket* packet = NULL;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        assert(m_observer == NULL);
+        assert(m_reactor == NULL);
+        assert(m_packet == NULL);
+        if (m_observer != NULL || m_reactor != NULL || m_packet != NULL)
+        {
+            return (false);
+        }
+
+        if (!CMsgClient::Init(reactor, configFileName, mmType,
+            serverIp, serverPort, user, password, localIp))
+        {
+            goto EXIT;
+        }
+
+        packet = CRpcPacket::CreateInstance();
+        if (packet == NULL)
+        {
+            goto EXIT;
+        }
+
+        observer->AddRef();
+        m_observer   = observer;
+        m_configInfo = configInfo;
+        m_packet     = packet;
+    }
+
+    return (true);
+
+EXIT:
+
+    if (packet != NULL)
+    {
+        packet->Release();
+    }
+
+    CMsgClient::Fini();
+
+    return (false);
+}
+
+void
+CRpcClient::Fini()
+{
+    IRpcClientObserver* observer = NULL;
+    CRpcPacket*         packet   = NULL;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
+        {
+            return;
+        }
+
+        CProStlMap<unsigned long, RPC_HDR>::const_iterator       itr = m_timerId2Hdr.begin();
+        CProStlMap<unsigned long, RPC_HDR>::const_iterator const end = m_timerId2Hdr.end();
+
+        for (; itr != end; ++itr)
+        {
+            m_reactor->CancelTimer(itr->first);
+        }
+
+        m_requestId2TimerId.clear();
+        m_timerId2Hdr.clear();
+        m_funtionId2Info.clear();
+        packet = m_packet;
+        m_packet = NULL;
+        observer = m_observer;
+        m_observer = NULL;
+    }
+
+    packet->Release();
+    observer->Release();
+
+    CMsgClient::Fini();
+}
+
+unsigned long
+PRO_CALLTYPE
+CRpcClient::AddRef()
+{
+    const unsigned long refCount = CMsgClient::AddRef();
+
+    return (refCount);
+}
+
+unsigned long
+PRO_CALLTYPE
+CRpcClient::Release()
+{
+    const unsigned long refCount = CMsgClient::Release();
+
+    return (refCount);
+}
+
+RTP_MM_TYPE
+PRO_CALLTYPE
+CRpcClient::GetMmType() const
+{
+    RTP_MM_TYPE mmType = 0;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        mmType = m_msgConfigInfo.msgc_mm_type;
+    }
+
+    return (mmType);
+}
+
+const char*
+PRO_CALLTYPE
+CRpcClient::GetServerIp(char serverIp[64]) const
+{
+    return (CMsgClient::GetRemoteIp(serverIp));
+}
+
+unsigned short
+PRO_CALLTYPE
+CRpcClient::GetServerPort() const
+{
+    return (CMsgClient::GetRemotePort());
+}
+
+const char*
+PRO_CALLTYPE
+CRpcClient::GetLocalIp(char localIp[64]) const
+{
+    return (CMsgClient::GetLocalIp(localIp));
+}
+
+unsigned short
+PRO_CALLTYPE
+CRpcClient::GetLocalPort() const
+{
+    return (CMsgClient::GetLocalPort());
+}
+
+RPC_ERROR_CODE
+PRO_CALLTYPE
+CRpcClient::RegisterFunction(PRO_UINT32           functionId,
+                             const RPC_DATA_TYPE* callArgTypes, /* = NULL */
+                             size_t               callArgCount, /* = 0 */
+                             const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
+                             size_t               retnArgCount) /* = 0 */
+{
+    assert(functionId > 0);
+    if (functionId == 0)
+    {
+        return (RPCE_INVALID_ARGUMENT);
+    }
+
+    if (
+        (callArgTypes == NULL && callArgCount > 0)
+        ||
+        (retnArgTypes == NULL && retnArgCount > 0)
+       )
+    {
+        assert(0);
+
+        return (RPCE_INVALID_ARGUMENT);
+    }
+
+    for (int i = 0; i < (int)callArgCount; ++i)
+    {
+        assert(CheckRpcDataType(callArgTypes[i]));
+        if (!CheckRpcDataType(callArgTypes[i]))
+        {
+            return (RPCE_INVALID_ARGUMENT);
+        }
+    }
+
+    for (int j = 0; j < (int)retnArgCount; ++j)
+    {
+        assert(CheckRpcDataType(retnArgTypes[j]));
+        if (!CheckRpcDataType(retnArgTypes[j]))
+        {
+            return (RPCE_INVALID_ARGUMENT);
+        }
+    }
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
+        {
+            return (RPCE_ERROR);
+        }
+
+        RPC_FUNCTION_INFO& info = m_funtionId2Info[functionId]; /* insert */
+        info.callArgTypes.clear();
+        info.retnArgTypes.clear();
+
+        for (int m = 0; m < (int)callArgCount; ++m)
+        {
+            info.callArgTypes.push_back(callArgTypes[m]);
+        }
+
+        for (int n = 0; n < (int)retnArgCount; ++n)
+        {
+            info.retnArgTypes.push_back(retnArgTypes[n]);
+        }
+    }
+
+    return (RPCE_OK);
+}
+
+void
+PRO_CALLTYPE
+CRpcClient::UnregisterFunction(PRO_UINT32 functionId)
+{
+    if (functionId == 0)
+    {
+        return;
+    }
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
+        {
+            return;
+        }
+
+        m_funtionId2Info.erase(functionId);
+    }
+}
+
+RPC_ERROR_CODE
+PRO_CALLTYPE
+CRpcClient::SendRequest(IRpcPacket*   request,
+                        unsigned long rpcTimeoutInSeconds) /* = 0 */
+{
+    assert(request != NULL);
+    if (request == NULL)
+    {
+        return (RPCE_INVALID_ARGUMENT);
+    }
+
+    if (rpcTimeoutInSeconds == 0)
+    {
+        rpcTimeoutInSeconds = m_configInfo.rpcc_rpc_timeout;
+    }
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
+        {
+            return (RPCE_ERROR);
+        }
+
+        if (m_msgClient == NULL || m_clientId == 0)
+        {
+            return (RPCE_NETWORK_NOT_CONNECTED);
+        }
+
+        if (m_timerId2Hdr.size() >= m_configInfo.rpcc_pending_calls)
+        {
+            return (RPCE_CLIENT_BUSY);
+        }
+
+        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::const_iterator const itr =
+            m_funtionId2Info.find(request->GetFunctionId());
+        if (itr == m_funtionId2Info.end())
+        {
+            return (RPCE_INVALID_FUNCTION);
+        }
+
+        const RPC_FUNCTION_INFO& info = itr->second;
+        if (!CmpRpcPacketTypes(request, info.callArgTypes))
+        {
+            return (RPCE_MISMATCHED_PARAMETER);
+        }
+
+        if (!m_msgClient->SendMsg(request->GetTotalBuffer(),
+            request->GetTotalSize(), 0, &RPC_ROOT_ID, 1))
+        {
+            return (RPCE_NETWORK_BUSY);
+        }
+
+        RPC_HDR hdr;
+        memset(&hdr, 0, sizeof(RPC_HDR));
+        hdr.requestId  = request->GetRequestId();
+        hdr.functionId = request->GetFunctionId();
+
+        const unsigned long timerId = m_reactor->ScheduleTimer(
+            this, (PRO_UINT64)rpcTimeoutInSeconds * 1000, false);
+
+        m_timerId2Hdr[timerId]             = hdr;
+        m_requestId2TimerId[hdr.requestId] = timerId;
+    }
+
+    return (RPCE_OK);
+}
+
+void
+PRO_CALLTYPE
+CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
+                    const RTP_MSG_USER* myUser,
+                    const char*         myPublicIp)
+{{
+    CProThreadMutexGuard mon(m_lockUpcall);
+
+    assert(msgClient != NULL);
+    assert(myUser != NULL);
+    assert(myPublicIp != NULL);
+    assert(myPublicIp[0] != '\0');
+    if (msgClient == NULL || myUser == NULL || myPublicIp == NULL ||
+        myPublicIp[0] == '\0')
+    {
+        return;
+    }
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
+            m_msgClient == NULL)
+        {
+            return;
+        }
+
+        if (msgClient != m_msgClient)
+        {
+            return;
+        }
+
+        m_clientId = myUser->UserId();
+    }
+
+    {{{
+        char suiteName[64] = "";
+        msgClient->GetSslSuite(suiteName);
+
+        printf(
+            "\n CRpcClient::OnOkMsg(id : " PRO_PRT64U ", publicIp : %s,"
+            " sslSuite : %s, server : %s:%u, mmType : %u) \n"
+            ,
+            m_clientId,
+            myPublicIp,
+            suiteName,
+            m_msgConfigInfo.msgc_server_ip.c_str(),
+            (unsigned int)m_msgConfigInfo.msgc_server_port,
+            (unsigned int)m_msgConfigInfo.msgc_mm_type
+            );
+    }}}
+}}
+
+void
+PRO_CALLTYPE
+CRpcClient::OnRecvMsg(IRtpMsgClient*      msgClient,
+                      const void*         buf,
+                      unsigned long       size,
+                      PRO_UINT16          charset,
+                      const RTP_MSG_USER* srcUser)
+{{
+    CProThreadMutexGuard mon(m_lockUpcall);
+
+    assert(msgClient != NULL);
+    assert(buf != NULL);
+    assert(size > 0);
+    assert(srcUser != NULL);
+    if (msgClient == NULL || buf == NULL || size == 0 || srcUser == NULL)
+    {
+        return;
+    }
+
+    if (srcUser->classId  != RPC_ROOT_ID.classId ||
+        srcUser->UserId() != RPC_ROOT_ID.UserId())
+    {
+        return;
+    }
+
+    IRpcClientObserver* observer = NULL;
+    CRpcPacket*         result   = NULL;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
+            m_msgClient == NULL)
+        {
+            return;
+        }
+
+        if (msgClient != m_msgClient)
+        {
+            return;
+        }
+
+        RPC_HDR                     hdr;
+        CProStlVector<RPC_ARGUMENT> args;
+
+        if (!CRpcPacket::ParseRpcPacket(buf, size, hdr, args) ||
+            hdr.requestId == 0 || hdr.functionId == 0)
+        {
+            return;
+        }
+
+        {
+            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::const_iterator const itr =
+                m_funtionId2Info.find(hdr.functionId);
+            if (itr == m_funtionId2Info.end())
+            {
+                return;
+            }
+
+            const RPC_FUNCTION_INFO& info = itr->second;
+            if (!CmpRpcArgsTypes(args, info.retnArgTypes))
+            {
+                return;
+            }
+        }
+
+        CProStlMap<PRO_UINT64, unsigned long>::iterator const itr =
+            m_requestId2TimerId.find(hdr.requestId);
+        if (itr == m_requestId2TimerId.end())
+        {
+            return;
+        }
+
+        m_reactor->CancelTimer(itr->second);
+        m_timerId2Hdr.erase(itr->second);
+        m_requestId2TimerId.erase(itr);
+
+        if (hdr.rpcCode == RPCE_OK)
+        {
+            result = CRpcPacket::CreateInstance(
+                hdr.requestId, hdr.functionId, true);
+            if (result == NULL)
+            {
+                hdr.rpcCode = RPCE_NOT_ENOUGH_MEMORY;
+            }
+        }
+
+        if (result != NULL)
+        {
+            assert(hdr.rpcCode == RPCE_OK);
+
+            result->SetClientId(m_clientId);
+            result->SetRpcCode(hdr.rpcCode);
+
+            if (args.size() > 0)
+            {
+                result->CleanAndBeginPushArgument();
+                if (!result->PushArguments(&args[0], args.size()) ||
+                    !result->EndPushArgument())
+                {
+                    hdr.rpcCode = RPCE_NOT_ENOUGH_MEMORY;
+                    result->Release();
+                    result = NULL;
+                }
+            }
+            else
+            {
+                result->CleanAndBeginPushArgument();
+                if (!result->EndPushArgument())
+                {
+                    hdr.rpcCode = RPCE_NOT_ENOUGH_MEMORY;
+                    result->Release();
+                    result = NULL;
+                }
+            }
+        }
+
+        if (result == NULL)
+        {
+            assert(hdr.rpcCode != RPCE_OK);
+
+            m_packet->AddRef();
+            result = m_packet;
+
+            result->SetClientId(m_clientId);
+            result->SetRequestId(hdr.requestId);
+            result->SetFunctionId(hdr.functionId);
+            result->SetRpcCode(hdr.rpcCode);
+        }
+
+        m_observer->AddRef();
+        observer = m_observer;
+    }
+
+    observer->OnResult(this, result);
+    observer->Release();
+    result->Release();
+}}
+
+void
+PRO_CALLTYPE
+CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
+                       long           errorCode,
+                       long           sslCode,
+                       bool           tcpConnected)
+{{
+    CProThreadMutexGuard mon(m_lockUpcall);
+
+    assert(msgClient != NULL);
+    if (msgClient == NULL)
+    {
+        return;
+    }
+
+    IRpcClientObserver*                observer = NULL;
+    CRpcPacket*                        result   = NULL;
+    PRO_UINT64                         clientId = 0;
+    CProStlMap<unsigned long, RPC_HDR> timerId2Hdr;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
+            m_msgClient == NULL)
+        {
+            return;
+        }
+
+        if (msgClient != m_msgClient)
+        {
+            return;
+        }
+
+        Reconnect();
+
+        m_requestId2TimerId.clear();
+        timerId2Hdr = m_timerId2Hdr;
+        m_timerId2Hdr.clear();
+        clientId = m_clientId;
+        m_clientId = 0;
+
+        m_observer->AddRef();
+        m_packet->AddRef();
+        observer = m_observer;
+        result   = m_packet;
+    }
+
+    {{{
+        printf(
+            "\n CRpcClient::OnCloseMsg(id : " PRO_PRT64U ","
+            " errorCode : [%d, %d], tcpConnected : %d, server : %s:%u,"
+            " mmType : %u) \n"
+            ,
+            clientId,
+            (int)errorCode,
+            (int)sslCode,
+            (int)tcpConnected,
+            m_msgConfigInfo.msgc_server_ip.c_str(),
+            (unsigned int)m_msgConfigInfo.msgc_server_port,
+            (unsigned int)m_msgConfigInfo.msgc_mm_type
+            );
+    }}}
+
+    CProStlMap<unsigned long, RPC_HDR>::const_iterator       itr = timerId2Hdr.begin();
+    CProStlMap<unsigned long, RPC_HDR>::const_iterator const end = timerId2Hdr.end();
+
+    for (; itr != end; ++itr)
+    {
+        const RPC_HDR& hdr = itr->second;
+
+        result->SetClientId(clientId);
+        result->SetRequestId(hdr.requestId);
+        result->SetFunctionId(hdr.functionId);
+        result->SetRpcCode(RPCE_NETWORK_BROKEN);
+
+        observer->OnResult(this, result);
+    }
+
+    result->Release();
+    observer->Release();
+}}
+
+void
+PRO_CALLTYPE
+CRpcClient::OnTimer(unsigned long timerId,
+                    PRO_INT64     userData)
+{{
+    CProThreadMutexGuard mon(m_lockUpcall);
+
+    assert(timerId > 0);
+    if (timerId == 0)
+    {
+        return;
+    }
+
+    IRpcClientObserver* observer = NULL;
+    CRpcPacket*         result   = NULL;
+    PRO_UINT64          clientId = 0;
+    RPC_HDR             hdr;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
+        {
+            return;
+        }
+
+        CProStlMap<unsigned long, RPC_HDR>::iterator const itr =
+            m_timerId2Hdr.find(timerId);
+        if (itr == m_timerId2Hdr.end())
+        {
+            return;
+        }
+
+        hdr = itr->second;
+
+        m_reactor->CancelTimer(timerId);
+        m_requestId2TimerId.erase(hdr.requestId);
+        m_timerId2Hdr.erase(itr);
+
+        m_observer->AddRef();
+        m_packet->AddRef();
+        observer = m_observer;
+        result   = m_packet;
+        clientId = m_clientId;
+    }
+
+    result->SetClientId(clientId);
+    result->SetRequestId(hdr.requestId);
+    result->SetFunctionId(hdr.functionId);
+    result->SetRpcCode(RPCE_NETWORK_TIMEOUT);
+
+    observer->OnResult(this, result);
+    observer->Release();
+    result->Release();
+}}
