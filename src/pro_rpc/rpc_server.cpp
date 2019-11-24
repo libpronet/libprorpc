@@ -501,7 +501,10 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
 {
     assert(msgServer != NULL);
     assert(user != NULL);
-    if (msgServer == NULL || user == NULL)
+    assert(userPublicIp != NULL);
+    assert(userPublicIp[0] != '\0');
+    if (msgServer == NULL || user == NULL || userPublicIp == NULL ||
+        userPublicIp[0] == '\0')
     {
         return;
     }
@@ -510,6 +513,10 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
     {
         return;
     }
+
+    const PRO_UINT64 clientId = user->UserId();
+
+    IRpcServerObserver* observer = NULL;
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -524,8 +531,14 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
             return;
         }
 
-        m_taskPool->AddChannel(user->UserId());
+        m_taskPool->AddChannel(clientId);
+
+        m_observer->AddRef();
+        observer = m_observer;
     }
+
+    observer->OnLogon(this, clientId, userPublicIp);
+    observer->Release();
 }
 
 void
@@ -547,6 +560,10 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
         return;
     }
 
+    const PRO_UINT64 clientId = user->UserId();
+
+    IRpcServerObserver* observer = NULL;
+
     {
         CProThreadMutexGuard mon(m_lock);
 
@@ -560,8 +577,14 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
             return;
         }
 
-        m_taskPool->RemoveChannel(user->UserId());
+        m_taskPool->RemoveChannel(clientId);
+
+        m_observer->AddRef();
+        observer = m_observer;
     }
+
+    observer->OnLogoff(this, clientId, errorCode, sslCode);
+    observer->Release();
 }
 
 void
@@ -586,16 +609,18 @@ CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
         return;
     }
 
+    const PRO_UINT64 srcClientId = srcUser->UserId();
+
     RPC_HDR                     hdr;
     CProStlVector<RPC_ARGUMENT> args;
 
     if (CRpcPacket::ParseRpcPacket(buf, size, hdr, args))
     {
-        RecvRpc(msgServer, hdr, args, srcUser->UserId());
+        RecvRpc(msgServer, hdr, args, srcClientId);
     }
     else
     {
-        RecvMsg(msgServer, buf, size, charset, srcUser->UserId());
+        RecvMsg(msgServer, buf, size, charset, srcClientId);
     }
 }
 
