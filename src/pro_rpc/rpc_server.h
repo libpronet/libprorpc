@@ -20,6 +20,7 @@
 #define RPC_SERVER_H
 
 #include "pro_rpc.h"
+#include "rpc_packet.h"
 #include "promsg/msg_server.h"
 #include "pronet/pro_memory_pool.h"
 #include "pronet/pro_stl.h"
@@ -92,7 +93,17 @@ public:
 
     virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId);
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendResult(IRpcPacket* result);
+    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcResult(IRpcPacket* result);
+
+    virtual bool PRO_CALLTYPE SendMsgToClients(
+        const void*       buf,
+        unsigned long     size,
+        PRO_UINT16        charset,
+        const PRO_UINT64* dstClients,
+        unsigned char     dstClientCount
+        );
+
+    virtual void PRO_CALLTYPE KickoutClient(PRO_UINT64 clientId);
 
 private:
 
@@ -136,7 +147,20 @@ private:
         const RTP_MSG_USER* srcUser
         );
 
-    void AsyncOnRecvMsg(PRO_INT64* args);
+    void RecvRpc(
+        IRtpMsgServer*                     msgServer,
+        RPC_HDR                            hdr,
+        const CProStlVector<RPC_ARGUMENT>& args,
+        PRO_UINT64                         srcClientId
+        );
+
+    void RecvMsg(
+        IRtpMsgServer* msgServer,
+        const void*    buf,
+        unsigned long  size,
+        PRO_UINT16     charset,
+        PRO_UINT64     srcClientId
+        );
 
     void SendErrorCode(
         PRO_UINT64     clientId,
@@ -144,6 +168,8 @@ private:
         PRO_UINT32     functionId,
         RPC_ERROR_CODE rpcCode
         );
+
+    void AsyncRecvRpc(PRO_INT64* args);
 
 private:
 

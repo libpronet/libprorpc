@@ -23,6 +23,7 @@
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
+#include <cassert>
 
 #if defined(__cplusplus)
 extern "C" {
@@ -167,6 +168,12 @@ CreateRpcResult(PRO_UINT64          clientId,
                 const RPC_ARGUMENT* args,  /* = NULL */
                 size_t              count) /* = 0 */
 {
+    assert(clientId > 0);
+    if (clientId == 0)
+    {
+        return (NULL);
+    }
+
     CRpcPacket* packet =
         CRpcPacket::CreateInstance(requestId, functionId, false);
     if (packet == NULL)

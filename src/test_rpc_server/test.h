@@ -53,10 +53,37 @@ private:
 
     virtual ~CTest();
 
-    virtual void PRO_CALLTYPE OnRequest(
+    virtual void PRO_CALLTYPE OnLogon(
+        IRpcServer* server,
+        PRO_UINT64  clientId,
+        const char* clientPublicIp
+        )
+    {
+    }
+
+    virtual void PRO_CALLTYPE OnLogoff(
+        IRpcServer* server,
+        PRO_UINT64  clientId,
+        long        errorCode,
+        long        sslCode
+        )
+    {
+    }
+
+    virtual void PRO_CALLTYPE OnRpcRequest(
         IRpcServer* server,
         IRpcPacket* request
         );
+
+    virtual void PRO_CALLTYPE OnRecvMsg(
+        IRpcServer*   server,
+        const void*   buf,
+        unsigned long size,
+        PRO_UINT16    charset,
+        PRO_UINT64    srcClientId
+        )
+    {
+    }
 
     static void RegisterFunctions(IRpcServer* server);
 

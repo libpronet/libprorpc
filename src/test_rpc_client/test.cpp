@@ -267,7 +267,7 @@ CTest::Test1(PRO_INT64 tick)
             return;
         }
 
-        m_client->SendRequest(request);
+        m_client->SendRpcRequest(request);
         request->Release();
     }
 }
@@ -304,15 +304,45 @@ CTest::Test2(PRO_INT32       a,
             return;
         }
 
-        m_client->SendRequest(request);
+        m_client->SendRpcRequest(request);
         request->Release();
     }
 }
 
 void
 PRO_CALLTYPE
-CTest::OnResult(IRpcClient* client,
-                IRpcPacket* result)
+CTest::OnLogoff(IRpcClient* client,
+                long        errorCode,
+                long        sslCode,
+                bool        tcpConnected)
+{
+    assert(client != NULL);
+    if (client == NULL)
+    {
+        return;
+    }
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_reactor == NULL || m_client == NULL)
+        {
+            return;
+        }
+
+        if (client != m_client)
+        {
+            return;
+        }
+
+        m_client->Reconnect();
+    }
+}
+
+void
+PRO_CALLTYPE
+CTest::OnRpcResult(IRpcClient* client,
+                   IRpcPacket* result)
 {
     assert(client != NULL);
     assert(result != NULL);

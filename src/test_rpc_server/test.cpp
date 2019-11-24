@@ -221,8 +221,8 @@ CTest::GetServicePort() const
 
 void
 PRO_CALLTYPE
-CTest::OnRequest(IRpcServer* server,
-                 IRpcPacket* request)
+CTest::OnRpcRequest(IRpcServer* server,
+                    IRpcPacket* request)
 {
     assert(server != NULL);
     assert(request != NULL);
@@ -292,7 +292,7 @@ CTest::Test1_req(IRpcServer* server,
         return;
     }
 
-    server->SendResult(result);
+    server->SendRpcResult(result);
     result->Release();
 }
 
@@ -340,6 +340,6 @@ CTest::Test2_req(IRpcServer* server,
         return;
     }
 
-    server->SendResult(result);
+    server->SendRpcResult(result);
     result->Release();
 }

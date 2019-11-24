@@ -455,10 +455,26 @@ public:
 
     virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId) = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRequest(
+    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcRequest(
         IRpcPacket*   request,
         unsigned long rpcTimeoutInSeconds = 0
         ) = 0;
+
+    virtual bool PRO_CALLTYPE SendMsgToServer(
+        const void*       buf,
+        unsigned long     size,
+        PRO_UINT16        charset
+        ) = 0;
+
+    virtual bool PRO_CALLTYPE SendMsgToClients(
+        const void*       buf,
+        unsigned long     size,
+        PRO_UINT16        charset,
+        const PRO_UINT64* dstClients,
+        unsigned char     dstClientCount
+        ) = 0;
+
+    virtual bool PRO_CALLTYPE Reconnect() = 0;
 };
 
 class IRpcClientObserver
@@ -469,9 +485,30 @@ public:
 
     virtual unsigned long PRO_CALLTYPE Release() = 0;
 
-    virtual void PRO_CALLTYPE OnResult(
+    virtual void PRO_CALLTYPE OnLogon(
+        IRpcClient* client,
+        PRO_UINT64  myClientId,
+        const char* myPublicIp
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnLogoff(
+        IRpcClient* client,
+        long        errorCode,
+        long        sslCode,
+        bool        tcpConnected
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnRpcResult(
         IRpcClient* client,
         IRpcPacket* result
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnRecvMsg(
+        IRpcClient*   client,
+        const void*   buf,
+        unsigned long size,
+        PRO_UINT16    charset,
+        PRO_UINT64    srcClientId
         ) = 0;
 };
 
@@ -500,7 +537,17 @@ public:
 
     virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId) = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendResult(IRpcPacket* result) = 0;
+    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcResult(IRpcPacket* result) = 0;
+
+    virtual bool PRO_CALLTYPE SendMsgToClients(
+        const void*       buf,
+        unsigned long     size,
+        PRO_UINT16        charset,
+        const PRO_UINT64* dstClients,
+        unsigned char     dstClientCount
+        ) = 0;
+
+    virtual void PRO_CALLTYPE KickoutClient(PRO_UINT64 clientId) = 0;
 };
 
 class IRpcServerObserver
@@ -511,9 +558,30 @@ public:
 
     virtual unsigned long PRO_CALLTYPE Release() = 0;
 
-    virtual void PRO_CALLTYPE OnRequest(
+    virtual void PRO_CALLTYPE OnLogon(
+        IRpcServer* server,
+        PRO_UINT64  clientId,
+        const char* clientPublicIp
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnLogoff(
+        IRpcServer* server,
+        PRO_UINT64  clientId,
+        long        errorCode,
+        long        sslCode
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnRpcRequest(
         IRpcServer* server,
         IRpcPacket* request
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnRecvMsg(
+        IRpcServer*   server,
+        const void*   buf,
+        unsigned long size,
+        PRO_UINT16    charset,
+        PRO_UINT64    srcClientId
         ) = 0;
 };
 

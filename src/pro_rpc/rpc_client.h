@@ -99,10 +99,26 @@ public:
 
     virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId);
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRequest(
+    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcRequest(
         IRpcPacket*   request,
         unsigned long rpcTimeoutInSeconds /* = 0 */
         );
+
+    virtual bool PRO_CALLTYPE SendMsgToServer(
+        const void*       buf,
+        unsigned long     size,
+        PRO_UINT16        charset
+        );
+
+    virtual bool PRO_CALLTYPE SendMsgToClients(
+        const void*       buf,
+        unsigned long     size,
+        PRO_UINT16        charset,
+        const PRO_UINT64* dstClients,
+        unsigned char     dstClientCount
+        );
+
+    virtual bool PRO_CALLTYPE Reconnect();
 
 private:
 
@@ -134,6 +150,20 @@ private:
     virtual void PRO_CALLTYPE OnTimer(
         unsigned long timerId,
         PRO_INT64     userData
+        );
+
+    void RecvRpc(
+        IRtpMsgClient*                     msgClient,
+        RPC_HDR                            hdr,
+        const CProStlVector<RPC_ARGUMENT>& args
+        );
+
+    void RecvMsg(
+        IRtpMsgClient* msgClient,
+        const void*    buf,
+        unsigned long  size,
+        PRO_UINT16     charset,
+        PRO_UINT64     srcClientId
         );
 
 private:

@@ -354,7 +354,7 @@ CRpcServer::UnregisterFunction(PRO_UINT32 functionId)
 
 RPC_ERROR_CODE
 PRO_CALLTYPE
-CRpcServer::SendResult(IRpcPacket* result)
+CRpcServer::SendRpcResult(IRpcPacket* result)
 {
     assert(result != NULL);
     if (result == NULL)
@@ -396,6 +396,70 @@ CRpcServer::SendResult(IRpcPacket* result)
     }
 
     return (RPCE_OK);
+}
+
+bool
+PRO_CALLTYPE
+CRpcServer::SendMsgToClients(const void*       buf,
+                             unsigned long     size,
+                             PRO_UINT16        charset,
+                             const PRO_UINT64* dstClients,
+                             unsigned char     dstClientCount)
+{
+    assert(buf != NULL);
+    assert(size > 0);
+    assert(dstClients != NULL);
+    assert(dstClientCount > 0);
+    if (buf == NULL || size == 0 || dstClients == NULL || dstClientCount == 0)
+    {
+        return (false);
+    }
+
+    CProStlVector<RTP_MSG_USER> dstUsers;
+
+    for (int i = 0; i < (int)dstClientCount; ++i)
+    {
+        const RTP_MSG_USER user(RPC_CID, dstClients[i], RPC_IID);
+        dstUsers.push_back(user);
+    }
+
+    bool ret = false;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_taskPool == NULL || m_msgServer == NULL)
+        {
+            return (false);
+        }
+
+        ret = m_msgServer->SendMsg(buf, size, charset,
+            &dstUsers[0], (unsigned char)dstUsers.size());
+    }
+
+    return (ret);
+}
+
+void
+PRO_CALLTYPE
+CRpcServer::KickoutClient(PRO_UINT64 clientId)
+{
+    if (clientId == 0)
+    {
+        return;
+    }
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_taskPool == NULL || m_msgServer == NULL)
+        {
+            return;
+        }
+
+        const RTP_MSG_USER user(RPC_CID, clientId, RPC_IID);
+        m_msgServer->KickoutUser(&user);
+    }
 }
 
 bool
@@ -447,8 +511,6 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
         return;
     }
 
-    const PRO_UINT64 clientId = user->UserId();
-
     {
         CProThreadMutexGuard mon(m_lock);
 
@@ -462,7 +524,7 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
             return;
         }
 
-        m_taskPool->AddChannel(clientId);
+        m_taskPool->AddChannel(user->UserId());
     }
 }
 
@@ -485,8 +547,6 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
         return;
     }
 
-    const PRO_UINT64 clientId = user->UserId();
-
     {
         CProThreadMutexGuard mon(m_lock);
 
@@ -500,7 +560,7 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
             return;
         }
 
-        m_taskPool->RemoveChannel(clientId);
+        m_taskPool->RemoveChannel(user->UserId());
     }
 }
 
@@ -526,7 +586,31 @@ CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
         return;
     }
 
-    const PRO_UINT64 clientId = srcUser->UserId();
+    RPC_HDR                     hdr;
+    CProStlVector<RPC_ARGUMENT> args;
+
+    if (CRpcPacket::ParseRpcPacket(buf, size, hdr, args))
+    {
+        RecvRpc(msgServer, hdr, args, srcUser->UserId());
+    }
+    else
+    {
+        RecvMsg(msgServer, buf, size, charset, srcUser->UserId());
+    }
+}
+
+void
+CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
+                    RPC_HDR                            hdr,
+                    const CProStlVector<RPC_ARGUMENT>& args,
+                    PRO_UINT64                         srcClientId)
+{
+    assert(msgServer != NULL);
+
+    if (srcClientId == 0 || hdr.requestId == 0 || hdr.functionId == 0)
+    {
+        return;
+    }
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -537,15 +621,6 @@ CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
         }
 
         if (msgServer != m_msgServer)
-        {
-            return;
-        }
-
-        RPC_HDR                     hdr;
-        CProStlVector<RPC_ARGUMENT> args;
-
-        if (!CRpcPacket::ParseRpcPacket(buf, size, hdr, args) ||
-            hdr.requestId == 0 || hdr.functionId == 0)
         {
             return;
         }
@@ -568,19 +643,22 @@ CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
         if (m_taskPool->GetSize() >= m_configInfo.rpcs_pending_calls)
         {
             SendErrorCode(
-                clientId, hdr.requestId, hdr.functionId, RPCE_SERVER_BUSY);
+                srcClientId, hdr.requestId, hdr.functionId, RPCE_SERVER_BUSY);
 
             return;
         }
 
-        CRpcPacket* request =
-            CRpcPacket::CreateInstance(hdr.requestId, hdr.functionId, true);
+        CRpcPacket* request = CRpcPacket::CreateInstance(
+            hdr.requestId,
+            hdr.functionId,
+            true /* this is a rebuilt packet */
+            );
         if (request == NULL)
         {
             return;
         }
 
-        request->SetClientId(clientId);
+        request->SetClientId(srcClientId);
 
         if (args.size() > 0)
         {
@@ -610,15 +688,15 @@ CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
         IProFunctorCommand* const command =
             CProFunctorCommand_cpp<CRpcServer, ACTION>::CreateInstance(
             *this,
-            &CRpcServer::AsyncOnRecvMsg,
+            &CRpcServer::AsyncRecvRpc,
             (PRO_INT64)request
             );
-        m_taskPool->Put(clientId, command);
+        m_taskPool->Put(srcClientId, command);
     }
 }
 
 void
-CRpcServer::AsyncOnRecvMsg(PRO_INT64* args)
+CRpcServer::AsyncRecvRpc(PRO_INT64* args)
 {
     CRpcPacket* const request = (CRpcPacket*)args[0];
 
@@ -636,11 +714,45 @@ CRpcServer::AsyncOnRecvMsg(PRO_INT64* args)
 
     if (observer != NULL)
     {
-        observer->OnRequest(this, request);
+        observer->OnRpcRequest(this, request);
         observer->Release();
     }
 
     request->Release();
+}
+
+void
+CRpcServer::RecvMsg(IRtpMsgServer*      msgServer,
+                    const void*         buf,
+                    unsigned long       size,
+                    PRO_UINT16          charset,
+                    PRO_UINT64          srcClientId)
+{
+    assert(msgServer != NULL);
+    assert(buf != NULL);
+    assert(size > 0);
+
+    IRpcServerObserver* observer = NULL;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        if (m_observer == NULL || m_taskPool == NULL || m_msgServer == NULL)
+        {
+            return;
+        }
+
+        if (msgServer != m_msgServer)
+        {
+            return;
+        }
+
+        m_observer->AddRef();
+        observer = m_observer;
+    }
+
+    observer->OnRecvMsg(this, buf, size, charset, srcClientId);
+    observer->Release();
 }
 
 void
