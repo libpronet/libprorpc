@@ -634,7 +634,7 @@ CRpcClient::OnRecvMsg(IRtpMsgClient*      msgClient,
     }
     else
     {
-        RecvMsg(msgClient, buf, size, charset, srcUser->UserId());
+        RecvMsg(msgClient, buf, size, charset, 0);
     }
 }}
 
@@ -789,7 +789,15 @@ CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
         observer = m_observer;
     }
 
-    observer->OnRecvMsg(this, buf, size, charset, srcClientId);
+    if (srcClientId == 0)
+    {
+        observer->OnRecvMsgFromServer(this, buf, size, charset);
+    }
+    else
+    {
+        observer->OnRecvMsgFromClient(this, buf, size, charset, srcClientId);
+    }
+
     observer->Release();
 }}
 

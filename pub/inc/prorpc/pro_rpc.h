@@ -503,7 +503,14 @@ public:
         IRpcPacket* result
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnRecvMsg(
+    virtual void PRO_CALLTYPE OnRecvMsgFromServer(
+        IRpcClient*   client,
+        const void*   buf,
+        unsigned long size,
+        PRO_UINT16    charset
+        ) = 0;
+
+    virtual void PRO_CALLTYPE OnRecvMsgFromClient(
         IRpcClient*   client,
         const void*   buf,
         unsigned long size,
