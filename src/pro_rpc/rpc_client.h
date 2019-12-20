@@ -48,6 +48,18 @@ struct RPC_CLIENT_CONFIG_INFO
     DECLARE_SGI_POOL(0);
 };
 
+struct RPC_HDR2 : public RPC_HDR
+{
+    RPC_HDR2()
+    {
+        magic = 0;
+    }
+
+    PRO_INT64 magic;
+
+    DECLARE_SGI_POOL(0);
+};
+
 /////////////////////////////////////////////////////////////////////////////
 ////
 
@@ -81,6 +93,8 @@ public:
 
     virtual RTP_MM_TYPE PRO_CALLTYPE GetMmType() const;
 
+    virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const;
+
     virtual const char* PRO_CALLTYPE GetServerIp(char serverIp[64]) const;
 
     virtual unsigned short PRO_CALLTYPE GetServerPort() const;
@@ -101,6 +115,7 @@ public:
 
     virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcRequest(
         IRpcPacket*   request,
+        bool          noreply,            /* = false */
         unsigned long rpcTimeoutInSeconds /* = 0 */
         );
 
@@ -119,6 +134,10 @@ public:
         );
 
     virtual bool PRO_CALLTYPE Reconnect();
+
+    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic);
+
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const;
 
 private:
 
@@ -148,8 +167,9 @@ private:
         );
 
     virtual void PRO_CALLTYPE OnTimer(
-        unsigned long timerId,
-        PRO_INT64     userData
+        void*      factory,
+        PRO_UINT64 timerId,
+        PRO_INT64  userData
         );
 
     void RecvRpc(
@@ -172,10 +192,11 @@ private:
     RPC_CLIENT_CONFIG_INFO                    m_configInfo;
     CRpcPacket*                               m_packet;
     PRO_UINT64                                m_clientId;
+    PRO_INT64                                 m_magic;
 
     CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO> m_funtionId2Info;
-    CProStlMap<unsigned long, RPC_HDR>        m_timerId2Hdr;
-    CProStlMap<PRO_UINT64, unsigned long>     m_requestId2TimerId;
+    CProStlMap<PRO_UINT64, RPC_HDR2>          m_timerId2Hdr;
+    CProStlMap<PRO_UINT64, PRO_UINT64>        m_requestId2TimerId;
 
     CProThreadMutex                           m_lockUpcall;
 

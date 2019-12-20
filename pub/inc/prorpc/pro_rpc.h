@@ -405,6 +405,8 @@ public:
 
     virtual RPC_ERROR_CODE PRO_CALLTYPE GetRpcCode() const = 0;
 
+    virtual bool PRO_CALLTYPE GetNoreply() const = 0;
+
     virtual unsigned long PRO_CALLTYPE GetArgumentCount() const = 0;
 
     virtual void PRO_CALLTYPE GetArgument(
@@ -422,6 +424,10 @@ public:
     virtual const void* PRO_CALLTYPE GetTotalBuffer() const = 0;
 
     virtual unsigned long PRO_CALLTYPE GetTotalSize() const = 0;
+
+    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic) = 0;
+
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -436,6 +442,8 @@ public:
     virtual unsigned long PRO_CALLTYPE Release() = 0;
 
     virtual RTP_MM_TYPE PRO_CALLTYPE GetMmType() const = 0;
+
+    virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const = 0;
 
     virtual const char* PRO_CALLTYPE GetServerIp(char serverIp[64]) const = 0;
 
@@ -457,6 +465,7 @@ public:
 
     virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcRequest(
         IRpcPacket*   request,
+        bool          noreply             = false,
         unsigned long rpcTimeoutInSeconds = 0
         ) = 0;
 
@@ -475,6 +484,10 @@ public:
         ) = 0;
 
     virtual bool PRO_CALLTYPE Reconnect() = 0;
+
+    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic) = 0;
+
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const = 0;
 };
 
 class IRpcClientObserver

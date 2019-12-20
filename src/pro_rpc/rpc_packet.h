@@ -31,10 +31,13 @@
 
 struct RPC_HDR
 {
-    char           magic[8];
+    char           signature[8];
     PRO_UINT64     requestId;
     PRO_UINT32     functionId;
     RPC_ERROR_CODE rpcCode; /* PRO_INT32 */
+    bool           noreply;
+    char           reserved[3];
+    PRO_UINT32     timeoutInSeconds;
 
     DECLARE_SGI_POOL(0);
 };
@@ -79,13 +82,29 @@ public:
 
     virtual unsigned long PRO_CALLTYPE Release();
 
+    void SetClientId(PRO_UINT64 clientId);
+
     virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const;
+
+    void SetRequestId(PRO_UINT64 requestId);
 
     virtual PRO_UINT64 PRO_CALLTYPE GetRequestId() const;
 
+    void SetFunctionId(PRO_UINT32 functionId);
+
     virtual PRO_UINT32 PRO_CALLTYPE GetFunctionId() const;
 
+    void SetRpcCode(RPC_ERROR_CODE rpcCode);
+
     virtual RPC_ERROR_CODE PRO_CALLTYPE GetRpcCode() const;
+
+    void SetNoreply(bool noreply);
+
+    virtual bool PRO_CALLTYPE GetNoreply() const;
+
+    void SetTimeout(PRO_UINT32 timeoutInSeconds);
+
+    PRO_UINT32 GetTimeout() const;
 
     virtual unsigned long PRO_CALLTYPE GetArgumentCount() const;
 
@@ -105,13 +124,9 @@ public:
 
     virtual unsigned long PRO_CALLTYPE GetTotalSize() const;
 
-    void SetClientId(PRO_UINT64 clientId);
+    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic);
 
-    void SetRequestId(PRO_UINT64 requestId);
-
-    void SetFunctionId(PRO_UINT32 functionId);
-
-    void SetRpcCode(RPC_ERROR_CODE rpcCode);
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const;
 
     /*
      * [[[[ push arguments
@@ -151,10 +166,9 @@ private:
 
     const bool                  m_convertByteOrder;
     PRO_UINT64                  m_clientId;
-    PRO_UINT64                  m_requestId;
-    PRO_UINT32                  m_functionId;
-    RPC_ERROR_CODE              m_rpcCode;
+    PRO_INT64                   m_magic;
 
+    RPC_HDR                     m_hdr;
     CProStlVector<RPC_ARGUMENT> m_args;
     CProBuffer                  m_buffer;
 

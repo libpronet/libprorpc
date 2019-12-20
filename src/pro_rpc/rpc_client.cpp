@@ -94,6 +94,7 @@ CRpcClient::CRpcClient()
     m_observer = NULL;
     m_packet   = NULL;
     m_clientId = 0;
+    m_magic    = 0;
 }
 
 CRpcClient::~CRpcClient()
@@ -205,8 +206,8 @@ CRpcClient::Fini()
             return;
         }
 
-        CProStlMap<unsigned long, RPC_HDR>::const_iterator       itr = m_timerId2Hdr.begin();
-        CProStlMap<unsigned long, RPC_HDR>::const_iterator const end = m_timerId2Hdr.end();
+        CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator       itr = m_timerId2Hdr.begin();
+        CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator const end = m_timerId2Hdr.end();
 
         for (; itr != end; ++itr)
         {
@@ -259,6 +260,21 @@ CRpcClient::GetMmType() const
     }
 
     return (mmType);
+}
+
+PRO_UINT64
+PRO_CALLTYPE
+CRpcClient::GetClientId() const
+{
+    PRO_UINT64 clientId = 0;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        clientId = m_clientId;
+    }
+
+    return (clientId);
 }
 
 const char*
@@ -382,6 +398,7 @@ CRpcClient::UnregisterFunction(PRO_UINT32 functionId)
 RPC_ERROR_CODE
 PRO_CALLTYPE
 CRpcClient::SendRpcRequest(IRpcPacket*   request,
+                           bool          noreply,             /* = false */
                            unsigned long rpcTimeoutInSeconds) /* = 0 */
 {
     assert(request != NULL);
@@ -394,6 +411,10 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
     {
         rpcTimeoutInSeconds = m_configInfo.rpcc_rpc_timeout;
     }
+
+    CRpcPacket* const request2 = (CRpcPacket*)request;
+    request2->SetNoreply(noreply);
+    request2->SetTimeout(rpcTimeoutInSeconds);
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -432,16 +453,20 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
             return (RPCE_NETWORK_BUSY);
         }
 
-        RPC_HDR hdr;
-        memset(&hdr, 0, sizeof(RPC_HDR));
-        hdr.requestId  = request->GetRequestId();
-        hdr.functionId = request->GetFunctionId();
+        if (!noreply)
+        {
+            RPC_HDR2 hdr;
+            memset(&hdr, 0, sizeof(RPC_HDR2));
+            hdr.requestId  = request->GetRequestId();
+            hdr.functionId = request->GetFunctionId();
+            hdr.magic      = request->GetMagic();
 
-        const unsigned long timerId = m_reactor->ScheduleTimer(
-            this, (PRO_UINT64)rpcTimeoutInSeconds * 1000, false);
+            const PRO_UINT64 timerId = m_reactor->ScheduleTimer(
+                this, (PRO_UINT64)rpcTimeoutInSeconds * 1000, false);
 
-        m_timerId2Hdr[timerId]             = hdr;
-        m_requestId2TimerId[hdr.requestId] = timerId;
+            m_timerId2Hdr[timerId]             = hdr;
+            m_requestId2TimerId[hdr.requestId] = timerId;
+        }
     }
 
     return (RPCE_OK);
@@ -533,6 +558,32 @@ PRO_CALLTYPE
 CRpcClient::Reconnect()
 {
     return (CMsgClient::Reconnect());
+}
+
+void
+PRO_CALLTYPE
+CRpcClient::SetMagic(PRO_INT64 magic)
+{
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        m_magic = magic;
+    }
+}
+
+PRO_INT64
+PRO_CALLTYPE
+CRpcClient::GetMagic() const
+{
+    PRO_INT64 magic = 0;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        magic = m_magic;
+    }
+
+    return (magic);
 }
 
 void
@@ -682,12 +733,14 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             }
         }
 
-        CProStlMap<PRO_UINT64, unsigned long>::iterator const itr =
+        CProStlMap<PRO_UINT64, PRO_UINT64>::iterator const itr =
             m_requestId2TimerId.find(hdr.requestId);
         if (itr == m_requestId2TimerId.end())
         {
             return;
         }
+
+        const RPC_HDR2 hdr2 = m_timerId2Hdr[itr->second];
 
         m_reactor->CancelTimer(itr->second);
         m_timerId2Hdr.erase(itr->second);
@@ -712,6 +765,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
 
             result->SetClientId(m_clientId);
             result->SetRpcCode(hdr.rpcCode);
+            result->SetMagic(hdr2.magic);
 
             if (args.size() > 0)
             {
@@ -747,6 +801,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             result->SetRequestId(hdr.requestId);
             result->SetFunctionId(hdr.functionId);
             result->SetRpcCode(hdr.rpcCode);
+            result->SetMagic(hdr2.magic);
         }
 
         m_observer->AddRef();
@@ -816,10 +871,10 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
         return;
     }
 
-    IRpcClientObserver*                observer = NULL;
-    CRpcPacket*                        result   = NULL;
-    PRO_UINT64                         clientId = 0;
-    CProStlMap<unsigned long, RPC_HDR> timerId2Hdr;
+    IRpcClientObserver*              observer = NULL;
+    CRpcPacket*                      result   = NULL;
+    PRO_UINT64                       clientId = 0;
+    CProStlMap<PRO_UINT64, RPC_HDR2> timerId2Hdr;
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -863,17 +918,18 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
             );
     }}}
 
-    CProStlMap<unsigned long, RPC_HDR>::const_iterator       itr = timerId2Hdr.begin();
-    CProStlMap<unsigned long, RPC_HDR>::const_iterator const end = timerId2Hdr.end();
+    CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator       itr = timerId2Hdr.begin();
+    CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator const end = timerId2Hdr.end();
 
     for (; itr != end; ++itr)
     {
-        const RPC_HDR& hdr = itr->second;
+        const RPC_HDR2& hdr = itr->second;
 
         result->SetClientId(clientId);
         result->SetRequestId(hdr.requestId);
         result->SetFunctionId(hdr.functionId);
         result->SetRpcCode(RPCE_NETWORK_BROKEN);
+        result->SetMagic(hdr.magic);
 
         observer->OnRpcResult(this, result);
     }
@@ -885,13 +941,15 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
 
 void
 PRO_CALLTYPE
-CRpcClient::OnTimer(unsigned long timerId,
-                    PRO_INT64     userData)
+CRpcClient::OnTimer(void*      factory,
+                    PRO_UINT64 timerId,
+                    PRO_INT64  userData)
 {{
     CProThreadMutexGuard mon(m_lockUpcall);
 
+    assert(factory != NULL);
     assert(timerId > 0);
-    if (timerId == 0)
+    if (factory == NULL || timerId == 0)
     {
         return;
     }
@@ -899,7 +957,7 @@ CRpcClient::OnTimer(unsigned long timerId,
     IRpcClientObserver* observer = NULL;
     CRpcPacket*         result   = NULL;
     PRO_UINT64          clientId = 0;
-    RPC_HDR             hdr;
+    RPC_HDR2            hdr;
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -909,7 +967,7 @@ CRpcClient::OnTimer(unsigned long timerId,
             return;
         }
 
-        CProStlMap<unsigned long, RPC_HDR>::iterator const itr =
+        CProStlMap<PRO_UINT64, RPC_HDR2>::iterator const itr =
             m_timerId2Hdr.find(timerId);
         if (itr == m_timerId2Hdr.end())
         {
@@ -933,6 +991,7 @@ CRpcClient::OnTimer(unsigned long timerId,
     result->SetRequestId(hdr.requestId);
     result->SetFunctionId(hdr.functionId);
     result->SetRpcCode(RPCE_NETWORK_TIMEOUT);
+    result->SetMagic(hdr.magic);
 
     observer->OnRpcResult(this, result);
     observer->Release();

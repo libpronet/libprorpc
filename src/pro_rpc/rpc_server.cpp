@@ -26,6 +26,7 @@
 #include "pronet/pro_memory_pool.h"
 #include "pronet/pro_stl.h"
 #include "pronet/pro_thread_mutex.h"
+#include "pronet/pro_time_util.h"
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
@@ -667,8 +668,11 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
 
         if (m_taskPool->GetSize() >= m_configInfo.rpcs_pending_calls)
         {
-            SendErrorCode(
-                srcClientId, hdr.requestId, hdr.functionId, RPCE_SERVER_BUSY);
+            if (!hdr.noreply)
+            {
+                SendErrorCode(srcClientId, hdr.requestId, hdr.functionId,
+                    RPCE_SERVER_BUSY);
+            }
 
             return;
         }
@@ -684,6 +688,9 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
         }
 
         request->SetClientId(srcClientId);
+        request->SetNoreply(hdr.noreply);
+        request->SetTimeout(hdr.timeoutInSeconds);
+        request->SetMagic(ProGetTickCount64()); /* arrival time */
 
         if (args.size() > 0)
         {
@@ -724,6 +731,17 @@ void
 CRpcServer::AsyncRecvRpc(PRO_INT64* args)
 {
     CRpcPacket* const request = (CRpcPacket*)args[0];
+
+    /*
+     * check timeout
+     */
+    if (ProGetTickCount64() >=
+        request->GetMagic() + (PRO_INT64)request->GetTimeout() * 1000)
+    {
+        request->Release();
+
+        return;
+    }
 
     IRpcServerObserver* observer = NULL;
 

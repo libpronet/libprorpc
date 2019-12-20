@@ -29,7 +29,7 @@
 /////////////////////////////////////////////////////////////////////////////
 ////
 
-static const char      g_s_rpcMagic[8]   = "***PRPC";
+static const char      g_s_signature[8]  = "***PRPC";
 static PRO_UINT64      g_s_nextRequestId = 1;
 static CProThreadMutex g_s_lock;
 
@@ -333,11 +333,13 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
         memcpy(&hdr, now, sizeof(RPC_HDR));
         now += sizeof(RPC_HDR);
 
-        hdr.requestId  = pbsd_ntoh64(hdr.requestId);
-        hdr.functionId = pbsd_ntoh32(hdr.functionId);
-        hdr.rpcCode    = pbsd_ntoh32(hdr.rpcCode);
+        hdr.requestId        = pbsd_ntoh64(hdr.requestId);
+        hdr.functionId       = pbsd_ntoh32(hdr.functionId);
+        hdr.rpcCode          = pbsd_ntoh32(hdr.rpcCode);
+        hdr.timeoutInSeconds = pbsd_ntoh32(hdr.timeoutInSeconds);
 
-        if (strncmp(hdr.magic, g_s_rpcMagic, sizeof(hdr.magic)) != 0 ||
+        if (strncmp(
+            hdr.signature, g_s_signature, sizeof(hdr.signature)) != 0 ||
             hdr.requestId == 0 || hdr.functionId == 0)
         {
             break;
@@ -511,10 +513,15 @@ CRpcPacket::CRpcPacket(PRO_UINT64 requestId,
                        :
 m_convertByteOrder(convertByteOrder)
 {
-    m_clientId   = 0;
-    m_requestId  = requestId;
-    m_functionId = functionId;
-    m_rpcCode    = 0;
+    m_clientId             = 0;
+    m_magic                = 0;
+
+    memset(&m_hdr, 0, sizeof(RPC_HDR));
+    m_hdr.requestId        = requestId;
+    m_hdr.functionId       = functionId;
+    m_hdr.rpcCode          = RPCE_OK;
+    m_hdr.noreply          = false;
+    m_hdr.timeoutInSeconds = (PRO_UINT32)-1;
 }
 
 unsigned long
@@ -551,40 +558,95 @@ CRpcPacket::GetClientId() const
 void
 CRpcPacket::SetRequestId(PRO_UINT64 requestId)
 {
-    m_requestId = requestId;
+    m_hdr.requestId = requestId;
+
+    if (m_buffer.Size() >= sizeof(RPC_HDR))
+    {
+        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        hdr->requestId = pbsd_hton64(requestId);
+    }
 }
 
 PRO_UINT64
 PRO_CALLTYPE
 CRpcPacket::GetRequestId() const
 {
-    return (m_requestId);
+    return (m_hdr.requestId);
 }
 
 void
 CRpcPacket::SetFunctionId(PRO_UINT32 functionId)
 {
-    m_functionId = functionId;
+    m_hdr.functionId = functionId;
+
+    if (m_buffer.Size() >= sizeof(RPC_HDR))
+    {
+        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        hdr->functionId = pbsd_hton32(functionId);
+    }
 }
 
 PRO_UINT32
 PRO_CALLTYPE
 CRpcPacket::GetFunctionId() const
 {
-    return (m_functionId);
+    return (m_hdr.functionId);
 }
 
 void
 CRpcPacket::SetRpcCode(RPC_ERROR_CODE rpcCode)
 {
-    m_rpcCode = rpcCode;
+    m_hdr.rpcCode = rpcCode;
+
+    if (m_buffer.Size() >= sizeof(RPC_HDR))
+    {
+        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        hdr->rpcCode = pbsd_hton32(rpcCode);
+    }
 }
 
 RPC_ERROR_CODE
 PRO_CALLTYPE
 CRpcPacket::GetRpcCode() const
 {
-    return (m_rpcCode);
+    return (m_hdr.rpcCode);
+}
+
+void
+CRpcPacket::SetNoreply(bool noreply)
+{
+    m_hdr.noreply = noreply;
+
+    if (m_buffer.Size() >= sizeof(RPC_HDR))
+    {
+        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        hdr->noreply = noreply;
+    }
+}
+
+bool
+PRO_CALLTYPE
+CRpcPacket::GetNoreply() const
+{
+    return (m_hdr.noreply);
+}
+
+void
+CRpcPacket::SetTimeout(PRO_UINT32 timeoutInSeconds)
+{
+    m_hdr.timeoutInSeconds = timeoutInSeconds;
+
+    if (m_buffer.Size() >= sizeof(RPC_HDR))
+    {
+        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        hdr->timeoutInSeconds = pbsd_hton32(timeoutInSeconds);
+    }
+}
+
+PRO_UINT32
+CRpcPacket::GetTimeout() const
+{
+    return (m_hdr.timeoutInSeconds);
 }
 
 unsigned long
@@ -661,6 +723,20 @@ PRO_CALLTYPE
 CRpcPacket::GetTotalSize() const
 {
     return (m_buffer.Size());
+}
+
+void
+PRO_CALLTYPE
+CRpcPacket::SetMagic(PRO_INT64 magic)
+{
+    m_magic = magic;
+}
+
+PRO_INT64
+PRO_CALLTYPE
+CRpcPacket::GetMagic() const
+{
+    return (m_magic);
 }
 
 void
@@ -794,10 +870,12 @@ CRpcPacket::EndPushArgument()
     {
         RPC_HDR hdr;
         memset(&hdr, 0, sizeof(sizeof(RPC_HDR)));
-        strncpy_pro(hdr.magic, sizeof(hdr.magic), g_s_rpcMagic);
-        hdr.requestId  = pbsd_hton64(m_requestId);
-        hdr.functionId = pbsd_hton32(m_functionId);
-        hdr.rpcCode    = pbsd_hton32(m_rpcCode);
+        strncpy_pro(hdr.signature, sizeof(hdr.signature), g_s_signature);
+        hdr.requestId        = pbsd_hton64(m_hdr.requestId);
+        hdr.functionId       = pbsd_hton32(m_hdr.functionId);
+        hdr.rpcCode          = pbsd_hton32(m_hdr.rpcCode);
+        hdr.noreply          = m_hdr.noreply;
+        hdr.timeoutInSeconds = pbsd_hton32(m_hdr.timeoutInSeconds);
 
         memcpy(now, &hdr, sizeof(RPC_HDR));
         now += sizeof(RPC_HDR);
