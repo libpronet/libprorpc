@@ -425,9 +425,13 @@ public:
 
     virtual unsigned long PRO_CALLTYPE GetTotalSize() const = 0;
 
-    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic) = 0;
+    virtual void PRO_CALLTYPE SetMagic1(PRO_INT64 magic1) = 0;
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const = 0;
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic1() const = 0;
+
+    virtual void PRO_CALLTYPE SetMagic2(PRO_INT64 magic2) = 0;
+
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic2() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////

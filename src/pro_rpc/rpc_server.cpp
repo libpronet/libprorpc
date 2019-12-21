@@ -690,7 +690,6 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
         request->SetClientId(srcClientId);
         request->SetNoreply(hdr.noreply);
         request->SetTimeout(hdr.timeoutInSeconds);
-        request->SetMagic(ProGetTickCount64()); /* arrival time */
 
         if (args.size() > 0)
         {
@@ -721,7 +720,8 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
             CProFunctorCommand_cpp<CRpcServer, ACTION>::CreateInstance(
             *this,
             &CRpcServer::AsyncRecvRpc,
-            (PRO_INT64)request
+            (PRO_INT64)request,
+            (PRO_INT64)ProGetTickCount64() /* arrival time */
             );
         m_taskPool->Put(srcClientId, command);
     }
@@ -730,13 +730,14 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
 void
 CRpcServer::AsyncRecvRpc(PRO_INT64* args)
 {
-    CRpcPacket* const request = (CRpcPacket*)args[0];
+    CRpcPacket* const request     = (CRpcPacket*)args[0];
+    const PRO_INT64   arrivalTick =              args[1];
 
     /*
      * check timeout
      */
     if (ProGetTickCount64() >=
-        request->GetMagic() + (PRO_INT64)request->GetTimeout() * 1000)
+        arrivalTick + (PRO_INT64)request->GetTimeout() * 1000)
     {
         request->Release();
 

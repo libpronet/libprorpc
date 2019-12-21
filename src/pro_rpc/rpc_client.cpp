@@ -459,7 +459,8 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
             memset(&hdr, 0, sizeof(RPC_HDR2));
             hdr.requestId  = request->GetRequestId();
             hdr.functionId = request->GetFunctionId();
-            hdr.magic      = request->GetMagic();
+            hdr.magic1     = request->GetMagic1();
+            hdr.magic2     = request->GetMagic2();
 
             const PRO_UINT64 timerId = m_reactor->ScheduleTimer(
                 this, (PRO_UINT64)rpcTimeoutInSeconds * 1000, false);
@@ -765,7 +766,8 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
 
             result->SetClientId(m_clientId);
             result->SetRpcCode(hdr.rpcCode);
-            result->SetMagic(hdr2.magic);
+            result->SetMagic1(hdr2.magic1);
+            result->SetMagic2(hdr2.magic2);
 
             if (args.size() > 0)
             {
@@ -801,7 +803,8 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             result->SetRequestId(hdr.requestId);
             result->SetFunctionId(hdr.functionId);
             result->SetRpcCode(hdr.rpcCode);
-            result->SetMagic(hdr2.magic);
+            result->SetMagic1(hdr2.magic1);
+            result->SetMagic2(hdr2.magic2);
         }
 
         m_observer->AddRef();
@@ -929,7 +932,8 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
         result->SetRequestId(hdr.requestId);
         result->SetFunctionId(hdr.functionId);
         result->SetRpcCode(RPCE_NETWORK_BROKEN);
-        result->SetMagic(hdr.magic);
+        result->SetMagic1(hdr.magic1);
+        result->SetMagic2(hdr.magic2);
 
         observer->OnRpcResult(this, result);
     }
@@ -991,7 +995,8 @@ CRpcClient::OnTimer(void*      factory,
     result->SetRequestId(hdr.requestId);
     result->SetFunctionId(hdr.functionId);
     result->SetRpcCode(RPCE_NETWORK_TIMEOUT);
-    result->SetMagic(hdr.magic);
+    result->SetMagic1(hdr.magic1);
+    result->SetMagic2(hdr.magic2);
 
     observer->OnRpcResult(this, result);
     observer->Release();

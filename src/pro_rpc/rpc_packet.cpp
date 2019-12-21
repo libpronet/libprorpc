@@ -514,7 +514,8 @@ CRpcPacket::CRpcPacket(PRO_UINT64 requestId,
 m_convertByteOrder(convertByteOrder)
 {
     m_clientId             = 0;
-    m_magic                = 0;
+    m_magic1               = 0;
+    m_magic2               = 0;
 
     memset(&m_hdr, 0, sizeof(RPC_HDR));
     m_hdr.requestId        = requestId;
@@ -727,16 +728,30 @@ CRpcPacket::GetTotalSize() const
 
 void
 PRO_CALLTYPE
-CRpcPacket::SetMagic(PRO_INT64 magic)
+CRpcPacket::SetMagic1(PRO_INT64 magic1)
 {
-    m_magic = magic;
+    m_magic1 = magic1;
 }
 
 PRO_INT64
 PRO_CALLTYPE
-CRpcPacket::GetMagic() const
+CRpcPacket::GetMagic1() const
 {
-    return (m_magic);
+    return (m_magic1);
+}
+
+void
+PRO_CALLTYPE
+CRpcPacket::SetMagic2(PRO_INT64 magic2)
+{
+    m_magic2 = magic2;
+}
+
+PRO_INT64
+PRO_CALLTYPE
+CRpcPacket::GetMagic2() const
+{
+    return (m_magic2);
 }
 
 void

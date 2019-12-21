@@ -52,10 +52,12 @@ struct RPC_HDR2 : public RPC_HDR
 {
     RPC_HDR2()
     {
-        magic = 0;
+        magic1 = 0;
+        magic2 = 0;
     }
 
-    PRO_INT64 magic;
+    PRO_INT64 magic1;
+    PRO_INT64 magic2;
 
     DECLARE_SGI_POOL(0);
 };

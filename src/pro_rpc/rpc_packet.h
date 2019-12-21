@@ -124,9 +124,13 @@ public:
 
     virtual unsigned long PRO_CALLTYPE GetTotalSize() const;
 
-    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic);
+    virtual void PRO_CALLTYPE SetMagic1(PRO_INT64 magic1);
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const;
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic1() const;
+
+    virtual void PRO_CALLTYPE SetMagic2(PRO_INT64 magic2);
+
+    virtual PRO_INT64 PRO_CALLTYPE GetMagic2() const;
 
     /*
      * [[[[ push arguments
@@ -166,7 +170,8 @@ private:
 
     const bool                  m_convertByteOrder;
     PRO_UINT64                  m_clientId;
-    PRO_INT64                   m_magic;
+    PRO_INT64                   m_magic1;
+    PRO_INT64                   m_magic2;
 
     RPC_HDR                     m_hdr;
     CProStlVector<RPC_ARGUMENT> m_args;
