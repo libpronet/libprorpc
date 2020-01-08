@@ -26,6 +26,7 @@
 #include "pronet/pro_net.h"
 #include "pronet/pro_stl.h"
 #include "pronet/pro_thread_mutex.h"
+#include "pronet/pro_time_util.h"
 #include "pronet/pro_timer_factory.h"
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
@@ -629,14 +630,21 @@ CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
         observer = m_observer;
     }
 
+    if (0)
     {{{
         char suiteName[64] = "";
         msgClient->GetSslSuite(suiteName);
 
+        CProStlString timeString = "";
+        ProGetLocalTimeString(timeString);
+
         printf(
-            "\n CRpcClient::OnOkMsg(id : " PRO_PRT64U ", publicIp : %s,"
+            "\n"
+            "%s \n"
+            " CRpcClient::OnOkMsg(id : " PRO_PRT64U ", publicIp : %s,"
             " sslSuite : %s, server : %s:%u, mmType : %u) \n"
             ,
+            timeString.c_str(),
             clientId,
             myPublicIp,
             suiteName,
@@ -905,12 +913,19 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
         result   = m_packet;
     }
 
+    if (0)
     {{{
+        CProStlString timeString = "";
+        ProGetLocalTimeString(timeString);
+
         printf(
-            "\n CRpcClient::OnCloseMsg(id : " PRO_PRT64U ","
+            "\n"
+            "%s \n"
+            " CRpcClient::OnCloseMsg(id : " PRO_PRT64U ","
             " errorCode : [%d, %d], tcpConnected : %d, server : %s:%u,"
             " mmType : %u) \n"
             ,
+            timeString.c_str(),
             clientId,
             (int)errorCode,
             (int)sslCode,

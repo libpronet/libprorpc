@@ -419,11 +419,12 @@ CTest::Test1_ret(IRpcClient* client,
 
     const PRO_INT64 tick = ProGetTickCount64();
     if (tick - s_tick >= 1000)
-    {
+    {{{
         s_tick = tick;
 
         printf(
-            "\n CTest::Test1_ret(...), ret : %d, requestId : " PRO_PRT64U ","
+            "\n"
+            " CTest::Test1_ret(...), ret : %d, requestId : " PRO_PRT64U ","
             " TPS : %.1f, RTT : %d \n"
             ,
             (int)arg_ret,
@@ -431,7 +432,7 @@ CTest::Test1_ret(IRpcClient* client,
             tps,
             (int)(tick - arg_tick)
             );
-    }
+    }}}
 }
 
 void
@@ -470,11 +471,12 @@ CTest::Test2_ret(IRpcClient* client,
 
     const PRO_INT64 tick = ProGetTickCount64();
     if (tick - s_tick >= 1000)
-    {
+    {{{
         s_tick = tick;
 
         printf(
-            "\n CTest::Test2_ret(...), ret : %d, requestId : " PRO_PRT64U ","
+            "\n"
+            " CTest::Test2_ret(...), ret : %d, requestId : " PRO_PRT64U ","
             " TPS : %.1f, RTT : %d \n"
             ,
             (int)arg_ret,
@@ -482,5 +484,5 @@ CTest::Test2_ret(IRpcClient* client,
             tps,
             (int)(tick - arg_tick)
             );
-    }
+    }}}
 }
