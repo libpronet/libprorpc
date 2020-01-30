@@ -35,6 +35,7 @@
 /////////////////////////////////////////////////////////////////////////////
 ////
 
+static const unsigned char C2S_CID = 1;
 static const unsigned char RPC_CID = 2;
 static const PRO_UINT16    RPC_IID = 1;
 
@@ -371,7 +372,7 @@ CRpcServer::SendRpcResult(IRpcPacket* result)
             return (RPCE_ERROR);
         }
 
-        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::const_iterator const itr =
+        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
             m_funtionId2Info.find(result->GetFunctionId());
         if (itr == m_funtionId2Info.end())
         {
@@ -482,12 +483,18 @@ CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
         return (false);
     }
 
-    if (user->classId != RPC_CID)
+    if (user->classId == C2S_CID)
+    {
+        *isC2s  = true;
+    }
+    else if (user->classId == RPC_CID)
+    {
+        *instId = RPC_IID;
+    }
+    else
     {
         return (false);
     }
-
-    *instId = RPC_IID;
 
     return (true);
 }
@@ -652,7 +659,7 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
         }
 
         {
-            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::const_iterator const itr =
+            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
                 m_funtionId2Info.find(hdr.functionId);
             if (itr == m_funtionId2Info.end())
             {

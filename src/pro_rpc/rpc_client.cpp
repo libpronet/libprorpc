@@ -207,8 +207,8 @@ CRpcClient::Fini()
             return;
         }
 
-        CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator       itr = m_timerId2Hdr.begin();
-        CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator const end = m_timerId2Hdr.end();
+        CProStlMap<PRO_UINT64, RPC_HDR2>::iterator       itr = m_timerId2Hdr.begin();
+        CProStlMap<PRO_UINT64, RPC_HDR2>::iterator const end = m_timerId2Hdr.end();
 
         for (; itr != end; ++itr)
         {
@@ -435,7 +435,7 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
             return (RPCE_CLIENT_BUSY);
         }
 
-        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::const_iterator const itr =
+        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
             m_funtionId2Info.find(request->GetFunctionId());
         if (itr == m_funtionId2Info.end())
         {
@@ -728,7 +728,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
         }
 
         {
-            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::const_iterator const itr =
+            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
                 m_funtionId2Info.find(hdr.functionId);
             if (itr == m_funtionId2Info.end())
             {
@@ -936,8 +936,8 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
             );
     }}}
 
-    CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator       itr = timerId2Hdr.begin();
-    CProStlMap<PRO_UINT64, RPC_HDR2>::const_iterator const end = timerId2Hdr.end();
+    CProStlMap<PRO_UINT64, RPC_HDR2>::iterator       itr = timerId2Hdr.begin();
+    CProStlMap<PRO_UINT64, RPC_HDR2>::iterator const end = timerId2Hdr.end();
 
     for (; itr != end; ++itr)
     {
