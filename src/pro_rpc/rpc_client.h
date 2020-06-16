@@ -45,7 +45,7 @@ struct RPC_CLIENT_CONFIG_INFO
     unsigned int rpcc_pending_calls;
     unsigned int rpcc_rpc_timeout; /* 1 ~ 3600 */
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 struct RPC_HDR2 : public RPC_HDR
@@ -59,7 +59,7 @@ struct RPC_HDR2 : public RPC_HDR
     PRO_INT64 magic1;
     PRO_INT64 magic2;
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -202,7 +202,7 @@ private:
 
     CProThreadMutex                           m_lockUpcall;
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 /////////////////////////////////////////////////////////////////////////////

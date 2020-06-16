@@ -39,7 +39,7 @@ struct RPC_HDR
     char           reserved[3];
     PRO_UINT32     timeoutInSeconds;
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -177,7 +177,7 @@ private:
     CProStlVector<RPC_ARGUMENT> m_args;
     CProBuffer                  m_buffer;
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 /////////////////////////////////////////////////////////////////////////////

@@ -45,7 +45,7 @@ struct RPC_SERVER_CONFIG_INFO
     unsigned int rpcs_pending_calls;
     unsigned int rpcs_worker_count; /* 1 ~ 100 */
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 struct RPC_FUNCTION_INFO
@@ -53,7 +53,7 @@ struct RPC_FUNCTION_INFO
     CProStlVector<RPC_DATA_TYPE> callArgTypes;
     CProStlVector<RPC_DATA_TYPE> retnArgTypes;
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -178,7 +178,7 @@ private:
     CProChannelTaskPool*                      m_taskPool;
     CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO> m_funtionId2Info;
 
-    DECLARE_SGI_POOL(0);
+    DECLARE_SGI_POOL(0)
 };
 
 /////////////////////////////////////////////////////////////////////////////
