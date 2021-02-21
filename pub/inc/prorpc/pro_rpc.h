@@ -29,11 +29,9 @@ extern "C" {
 /////////////////////////////////////////////////////////////////////////////
 ////
 
-#if defined(PRO_RPC_LIB)
-#define PRO_RPC_API
-#elif defined(PRO_RPC_EXPORTS)
+#if defined(PRO_RPC_EXPORTS)
 #if defined(_MSC_VER)
-#define PRO_RPC_API /* .def */
+#define PRO_RPC_API /* using xxx.def */
 #else
 #define PRO_RPC_API PRO_EXPORT
 #endif
@@ -665,7 +663,7 @@ CreateRpcResult(PRO_UINT64          clientId,
 ////
 
 #if defined(__cplusplus)
-}
+} /* extern "C" */
 #endif
 
 #endif /* ____PRO_RPC_H____ */

@@ -425,7 +425,7 @@ CTest::Test1_ret(IRpcClient* client,
         printf(
             "\n"
             " CTest::Test1_ret(...), ret : %d, requestId : " PRO_PRT64U ","
-            " TPS : %.1f, RTT : %d \n"
+            " TPS : %.1f, RTT' : %d \n"
             ,
             (int)arg_ret,
             result->GetRequestId(),
@@ -477,7 +477,7 @@ CTest::Test2_ret(IRpcClient* client,
         printf(
             "\n"
             " CTest::Test2_ret(...), ret : %d, requestId : " PRO_PRT64U ","
-            " TPS : %.1f, RTT : %d \n"
+            " TPS : %.1f, RTT' : %d \n"
             ,
             (int)arg_ret,
             result->GetRequestId(),

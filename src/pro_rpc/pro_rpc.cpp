@@ -211,5 +211,5 @@ CreateRpcResult(PRO_UINT64          clientId,
 ////
 
 #if defined(__cplusplus)
-}
+} /* extern "C" */
 #endif

@@ -16,8 +16,8 @@ libpro_rpc_so_CPPFLAGS = -DPRO_RPC_EXPORTS              \
                          -I/usr/local/libpronet/include \
                          -I/usr/local/libpromsg/include
 
-libpro_rpc_so_CFLAGS   = -fno-strict-aliasing -fPIC -fvisibility=hidden
-libpro_rpc_so_CXXFLAGS = -fno-strict-aliasing -fPIC -fvisibility=hidden
+libpro_rpc_so_CFLAGS   = -fPIC
+libpro_rpc_so_CXXFLAGS = -fPIC
 
 libpro_rpc_so_LDFLAGS = -shared -Wl,-soname,libpro_rpc.so     \
                         -Wl,-rpath,.:/usr/local/libpronet/lib \
