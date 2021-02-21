@@ -69,25 +69,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)_debug\</OutDir>
+    <OutDir>$(SolutionDir)_debug32\</OutDir>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>test_rpc_client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)_debug64x\</OutDir>
+    <OutDir>$(SolutionDir)_debug64\</OutDir>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>test_rpc_client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)_release\</OutDir>
+    <OutDir>$(SolutionDir)_release32\</OutDir>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>test_rpc_client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)_release64x\</OutDir>
+    <OutDir>$(SolutionDir)_release64\</OutDir>
     <GenerateManifest>false</GenerateManifest>
     <TargetName>test_rpc_client</TargetName>
   </PropertyGroup>
@@ -105,7 +105,7 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
-      <AdditionalDependencies>pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pro_shared.lib;pro_util_s.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-d/windows-vs2015/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -124,7 +124,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-d/windows-vs2015/x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pro_shared.lib;pro_util_s.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -145,7 +145,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateMapFile>true</GenerateMapFile>
-      <AdditionalDependencies>pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pro_shared.lib;pro_util_s.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-r/windows-vs2015/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -167,7 +167,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateMapFile>true</GenerateMapFile>
-      <AdditionalDependencies>pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>pro_shared.lib;pro_util_s.lib;pro_net.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-r/windows-vs2015/x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>

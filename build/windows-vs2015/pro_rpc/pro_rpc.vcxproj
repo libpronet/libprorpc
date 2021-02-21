@@ -88,25 +88,25 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)_debug\</OutDir>
+    <OutDir>$(SolutionDir)_debug32\</OutDir>
     <TargetName>pro_rpc</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
-    <OutDir>$(SolutionDir)_debug64x\</OutDir>
+    <OutDir>$(SolutionDir)_debug64\</OutDir>
     <TargetName>pro_rpc</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)_release\</OutDir>
+    <OutDir>$(SolutionDir)_release32\</OutDir>
     <TargetName>pro_rpc</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
-    <OutDir>$(SolutionDir)_release64x\</OutDir>
+    <OutDir>$(SolutionDir)_release64\</OutDir>
     <TargetName>pro_rpc</TargetName>
     <GenerateManifest>false</GenerateManifest>
   </PropertyGroup>
@@ -125,7 +125,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-d/windows-vs2015/x86;../../../../libpromsg/pub/lib-d/windows-vs2015/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mbedtls_s-mt.lib;pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;pro_rtp.lib;pro_msg_s-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mbedtls_s.lib;pro_shared.lib;pro_util_s.lib;pro_net.lib;pro_rtp.lib;pro_msg_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>../../../src/pro_rpc/pro_rpc.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -144,7 +144,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <GenerateMapFile>true</GenerateMapFile>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-d/windows-vs2015/x86_64;../../../../libpromsg/pub/lib-d/windows-vs2015/x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mbedtls_s-mt.lib;pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;pro_rtp.lib;pro_msg_s-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mbedtls_s.lib;pro_shared.lib;pro_util_s.lib;pro_net.lib;pro_rtp.lib;pro_msg_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>../../../src/pro_rpc/pro_rpc.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -167,7 +167,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateMapFile>true</GenerateMapFile>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-r/windows-vs2015/x86;../../../../libpromsg/pub/lib-r/windows-vs2015/x86;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mbedtls_s-mt.lib;pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;pro_rtp.lib;pro_msg_s-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mbedtls_s.lib;pro_shared.lib;pro_util_s.lib;pro_net.lib;pro_rtp.lib;pro_msg_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>../../../src/pro_rpc/pro_rpc.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>
@@ -190,7 +190,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateMapFile>true</GenerateMapFile>
       <AdditionalLibraryDirectories>../../../../libpronet/pub/lib-r/windows-vs2015/x86_64;../../../../libpromsg/pub/lib-r/windows-vs2015/x86_64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <AdditionalDependencies>mbedtls_s-mt.lib;pro_shared.lib;pro_util_s-mt.lib;pro_net.lib;pro_rtp.lib;pro_msg_s-mt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>mbedtls_s.lib;pro_shared.lib;pro_util_s.lib;pro_net.lib;pro_rtp.lib;pro_msg_s.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ModuleDefinitionFile>../../../src/pro_rpc/pro_rpc.def</ModuleDefinitionFile>
     </Link>
   </ItemDefinitionGroup>

@@ -10,8 +10,8 @@ test_rpc_server_SOURCES = ../../../../src/test_rpc_server/main.cpp \
 
 test_rpc_server_CPPFLAGS = -I/usr/local/libpronet/include
 
-test_rpc_server_CFLAGS   = -fno-strict-aliasing
-test_rpc_server_CXXFLAGS = -fno-strict-aliasing
+test_rpc_server_CFLAGS   =
+test_rpc_server_CXXFLAGS =
 
 test_rpc_server_LDFLAGS = -Wl,-rpath,.:../lib:${prolibdir}:/usr/local/libpronet/lib \
                           -Wl,--no-undefined
