@@ -391,6 +391,8 @@ class IRpcPacket
 {
 public:
 
+    virtual ~IRpcPacket() {}
+
     virtual unsigned long PRO_CALLTYPE AddRef() = 0;
 
     virtual unsigned long PRO_CALLTYPE Release() = 0;
@@ -438,6 +440,8 @@ public:
 class IRpcClient
 {
 public:
+
+    virtual ~IRpcClient() {}
 
     virtual unsigned long PRO_CALLTYPE AddRef() = 0;
 
@@ -496,6 +500,8 @@ class IRpcClientObserver
 {
 public:
 
+    virtual ~IRpcClientObserver() {}
+
     virtual unsigned long PRO_CALLTYPE AddRef() = 0;
 
     virtual unsigned long PRO_CALLTYPE Release() = 0;
@@ -541,6 +547,8 @@ class IRpcServer
 {
 public:
 
+    virtual ~IRpcServer() {}
+
     virtual unsigned long PRO_CALLTYPE AddRef() = 0;
 
     virtual unsigned long PRO_CALLTYPE Release() = 0;
@@ -575,6 +583,8 @@ public:
 class IRpcServerObserver
 {
 public:
+
+    virtual ~IRpcServerObserver() {}
 
     virtual unsigned long PRO_CALLTYPE AddRef() = 0;
 
