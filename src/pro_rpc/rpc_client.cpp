@@ -593,9 +593,7 @@ PRO_CALLTYPE
 CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
                     const RTP_MSG_USER* myUser,
                     const char*         myPublicIp)
-{{
-    CProThreadMutexGuard mon(m_lockUpcall);
-
+{
     assert(msgClient != NULL);
     assert(myUser != NULL);
     assert(myPublicIp != NULL);
@@ -656,7 +654,7 @@ CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
 
     observer->OnLogon(this, clientId, myPublicIp);
     observer->Release();
-}}
+}
 
 void
 PRO_CALLTYPE
@@ -665,9 +663,7 @@ CRpcClient::OnRecvMsg(IRtpMsgClient*      msgClient,
                       unsigned long       size,
                       PRO_UINT16          charset,
                       const RTP_MSG_USER* srcUser)
-{{
-    CProThreadMutexGuard mon(m_lockUpcall);
-
+{
     assert(msgClient != NULL);
     assert(buf != NULL);
     assert(size > 0);
@@ -696,13 +692,13 @@ CRpcClient::OnRecvMsg(IRtpMsgClient*      msgClient,
     {
         RecvMsg(msgClient, buf, size, charset, 0);
     }
-}}
+}
 
 void
 CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
                     RPC_HDR                            hdr,
                     const CProStlVector<RPC_ARGUMENT>& args)
-{{
+{
     assert(msgClient != NULL);
 
     if (hdr.requestId == 0 || hdr.functionId == 0)
@@ -822,7 +818,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
     observer->OnRpcResult(this, result);
     observer->Release();
     result->Release();
-}}
+}
 
 void
 CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
@@ -830,7 +826,7 @@ CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
                     unsigned long  size,
                     PRO_UINT16     charset,
                     PRO_UINT64     srcClientId)
-{{
+{
     assert(msgClient != NULL);
     assert(buf != NULL);
     assert(size > 0);
@@ -865,7 +861,7 @@ CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
     }
 
     observer->Release();
-}}
+}
 
 void
 PRO_CALLTYPE
@@ -873,9 +869,7 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
                        long           errorCode,
                        long           sslCode,
                        bool           tcpConnected)
-{{
-    CProThreadMutexGuard mon(m_lockUpcall);
-
+{
     assert(msgClient != NULL);
     if (msgClient == NULL)
     {
@@ -956,16 +950,14 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
     observer->OnLogoff(this, errorCode, sslCode, tcpConnected);
     observer->Release();
     result->Release();
-}}
+}
 
 void
 PRO_CALLTYPE
 CRpcClient::OnTimer(void*      factory,
                     PRO_UINT64 timerId,
                     PRO_INT64  userData)
-{{
-    CProThreadMutexGuard mon(m_lockUpcall);
-
+{
     assert(factory != NULL);
     assert(timerId > 0);
     if (factory == NULL || timerId == 0)
@@ -1016,4 +1008,4 @@ CRpcClient::OnTimer(void*      factory,
     observer->OnRpcResult(this, result);
     observer->Release();
     result->Release();
-}}
+}

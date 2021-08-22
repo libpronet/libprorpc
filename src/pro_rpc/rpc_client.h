@@ -200,8 +200,6 @@ private:
     CProStlMap<PRO_UINT64, RPC_HDR2>          m_timerId2Hdr;
     CProStlMap<PRO_UINT64, PRO_UINT64>        m_requestId2TimerId;
 
-    CProThreadMutex                           m_lockUpcall;
-
     DECLARE_SGI_POOL(0)
 };
 
