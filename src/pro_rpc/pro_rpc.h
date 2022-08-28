@@ -384,6 +384,17 @@ struct RPC_ARGUMENT
     };
 };
 
+struct RPC_HDR
+{
+    char           signature[8]; /* "***PRPC\0" */
+    PRO_UINT64     requestId;    /* > 0 */
+    PRO_UINT32     functionId;   /* > 0 */
+    RPC_ERROR_CODE rpcCode;
+    bool           noreply;
+    char           reserved[3];
+    PRO_UINT32     timeoutInSeconds;
+};
+
 /////////////////////////////////////////////////////////////////////////////
 ////
 
@@ -668,6 +679,12 @@ CreateRpcResult(PRO_UINT64          clientId,
                 RPC_ERROR_CODE      rpcCode,
                 const RPC_ARGUMENT* args,   /* = NULL */
                 size_t              count); /* = 0 */
+
+PRO_RPC_API
+IRpcPacket*
+PRO_CALLTYPE
+ParseRpcStreamToPacket(const void* streamBuffer,
+                       size_t      streamSize);
 
 /////////////////////////////////////////////////////////////////////////////
 ////

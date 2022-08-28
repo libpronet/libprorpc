@@ -20,6 +20,7 @@
 #include "rpc_client.h"
 #include "rpc_packet.h"
 #include "rpc_server.h"
+#include "pronet/pro_stl.h"
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
@@ -188,6 +189,55 @@ CreateRpcResult(PRO_UINT64          clientId,
     {
         packet->CleanAndBeginPushArgument();
         if (!packet->PushArguments(args, count) ||
+            !packet->EndPushArgument())
+        {
+            packet->Release();
+            packet = NULL;
+        }
+    }
+    else
+    {
+        packet->CleanAndBeginPushArgument();
+        if (!packet->EndPushArgument())
+        {
+            packet->Release();
+            packet = NULL;
+        }
+    }
+
+    return (packet);
+}
+
+PRO_RPC_API
+IRpcPacket*
+PRO_CALLTYPE
+ParseRpcStreamToPacket(const void* streamBuffer,
+                       size_t      streamSize)
+{
+    RPC_HDR                     hdr;
+    CProStlVector<RPC_ARGUMENT> args;
+
+    if (!CRpcPacket::ParseRpcPacket(streamBuffer, streamSize, hdr, args))
+    {
+        return (NULL);
+    }
+
+    CRpcPacket* packet = CRpcPacket::CreateInstance(
+        hdr.requestId,
+        hdr.functionId,
+        true /* this is a rebuilt packet */
+        );
+    if (packet == NULL)
+    {
+        return (NULL);
+    }
+
+    packet->SetRpcCode(hdr.rpcCode);
+
+    if (args.size() > 0)
+    {
+        packet->CleanAndBeginPushArgument();
+        if (!packet->PushArguments(&args[0], args.size()) ||
             !packet->EndPushArgument())
         {
             packet->Release();

@@ -29,22 +29,6 @@
 /////////////////////////////////////////////////////////////////////////////
 ////
 
-struct RPC_HDR
-{
-    char           signature[8];
-    PRO_UINT64     requestId;
-    PRO_UINT32     functionId;
-    RPC_ERROR_CODE rpcCode; /* PRO_INT32 */
-    bool           noreply;
-    char           reserved[3];
-    PRO_UINT32     timeoutInSeconds;
-
-    DECLARE_SGI_POOL(0)
-};
-
-/////////////////////////////////////////////////////////////////////////////
-////
-
 class CRpcPacket : public IRpcPacket, public CProRefCount
 {
 public:
