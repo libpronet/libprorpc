@@ -1,10 +1,5 @@
 #!/bin/sh
 
-rm -rf ./pro_rpc/.deps
-rm -rf ./test_rpc_server/.deps
-rm -rf ./test_rpc_client/.deps
-rm -rf ./cfg/.deps
-
 #
 # configure.ac ---> aclocal.m4
 #
