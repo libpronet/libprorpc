@@ -38,7 +38,6 @@ static CProThreadMutex g_s_lock;
 
 static
 PRO_UINT64
-PRO_CALLTYPE
 MakeRequestId_i()
 {
     g_s_lock.Lock();
@@ -57,7 +56,6 @@ MakeRequestId_i()
 
 static
 void
-PRO_CALLTYPE
 Reverse16_i(PRO_UINT16& var)
 {
     PRO_UINT16 ret = 0;
@@ -70,7 +68,6 @@ Reverse16_i(PRO_UINT16& var)
 
 static
 void
-PRO_CALLTYPE
 Reverse16s_i(PRO_UINT16* vars,
              size_t      size)
 {
@@ -93,7 +90,6 @@ Reverse16s_i(PRO_UINT16* vars,
 
 static
 void
-PRO_CALLTYPE
 Reverse32_i(PRO_UINT32& var)
 {
     PRO_UINT32 ret = 0;
@@ -108,7 +104,6 @@ Reverse32_i(PRO_UINT32& var)
 
 static
 void
-PRO_CALLTYPE
 Reverse32s_i(PRO_UINT32* vars,
              size_t      size)
 {
@@ -133,7 +128,6 @@ Reverse32s_i(PRO_UINT32* vars,
 
 static
 void
-PRO_CALLTYPE
 Reverse64_i(PRO_UINT64& var)
 {
     PRO_UINT64 ret = 0;
@@ -153,7 +147,6 @@ Reverse64_i(PRO_UINT64& var)
 
 static
 void
-PRO_CALLTYPE
 Reverse64s_i(PRO_UINT64* vars,
              size_t      size)
 {
@@ -183,7 +176,6 @@ Reverse64s_i(PRO_UINT64* vars,
 
 static
 unsigned long
-PRO_CALLTYPE
 GetNaluSize_i(const RPC_ARGUMENT& arg)
 {
     unsigned long size = sizeof(RPC_ARGUMENT);
@@ -526,7 +518,6 @@ m_convertByteOrder(convertByteOrder)
 }
 
 unsigned long
-PRO_CALLTYPE
 CRpcPacket::AddRef()
 {
     const unsigned long refCount = CProRefCount::AddRef();
@@ -535,7 +526,6 @@ CRpcPacket::AddRef()
 }
 
 unsigned long
-PRO_CALLTYPE
 CRpcPacket::Release()
 {
     const unsigned long refCount = CProRefCount::Release();
@@ -550,7 +540,6 @@ CRpcPacket::SetClientId(PRO_UINT64 clientId)
 }
 
 PRO_UINT64
-PRO_CALLTYPE
 CRpcPacket::GetClientId() const
 {
     return (m_clientId);
@@ -569,7 +558,6 @@ CRpcPacket::SetRequestId(PRO_UINT64 requestId)
 }
 
 PRO_UINT64
-PRO_CALLTYPE
 CRpcPacket::GetRequestId() const
 {
     return (m_hdr.requestId);
@@ -588,7 +576,6 @@ CRpcPacket::SetFunctionId(PRO_UINT32 functionId)
 }
 
 PRO_UINT32
-PRO_CALLTYPE
 CRpcPacket::GetFunctionId() const
 {
     return (m_hdr.functionId);
@@ -607,7 +594,6 @@ CRpcPacket::SetRpcCode(RPC_ERROR_CODE rpcCode)
 }
 
 RPC_ERROR_CODE
-PRO_CALLTYPE
 CRpcPacket::GetRpcCode() const
 {
     return (m_hdr.rpcCode);
@@ -626,7 +612,6 @@ CRpcPacket::SetNoreply(bool noreply)
 }
 
 bool
-PRO_CALLTYPE
 CRpcPacket::GetNoreply() const
 {
     return (m_hdr.noreply);
@@ -651,14 +636,12 @@ CRpcPacket::GetTimeout() const
 }
 
 unsigned long
-PRO_CALLTYPE
 CRpcPacket::GetArgumentCount() const
 {
     return ((unsigned long)m_args.size());
 }
 
 void
-PRO_CALLTYPE
 CRpcPacket::GetArgument(unsigned long index,
                         RPC_ARGUMENT* arg) const
 {
@@ -680,7 +663,6 @@ CRpcPacket::GetArgument(unsigned long index,
 }
 
 void
-PRO_CALLTYPE
 CRpcPacket::GetArguments(RPC_ARGUMENT* args,
                          size_t        count) const
 {
@@ -706,49 +688,42 @@ CRpcPacket::GetArguments(RPC_ARGUMENT* args,
 }
 
 void*
-PRO_CALLTYPE
 CRpcPacket::GetTotalBuffer()
 {
     return (m_buffer.Data());
 }
 
 const void*
-PRO_CALLTYPE
 CRpcPacket::GetTotalBuffer() const
 {
     return (m_buffer.Data());
 }
 
 unsigned long
-PRO_CALLTYPE
 CRpcPacket::GetTotalSize() const
 {
     return (m_buffer.Size());
 }
 
 void
-PRO_CALLTYPE
 CRpcPacket::SetMagic1(PRO_INT64 magic1)
 {
     m_magic1 = magic1;
 }
 
 PRO_INT64
-PRO_CALLTYPE
 CRpcPacket::GetMagic1() const
 {
     return (m_magic1);
 }
 
 void
-PRO_CALLTYPE
 CRpcPacket::SetMagic2(PRO_INT64 magic2)
 {
     m_magic2 = magic2;
 }
 
 PRO_INT64
-PRO_CALLTYPE
 CRpcPacket::GetMagic2() const
 {
     return (m_magic2);
@@ -1079,7 +1054,6 @@ CRpcPacket::EndPushArgument()
 ////
 
 bool
-PRO_CALLTYPE
 CheckRpcDataType(RPC_DATA_TYPE type)
 {
     bool ret = false;
@@ -1118,7 +1092,6 @@ CheckRpcDataType(RPC_DATA_TYPE type)
 }
 
 bool
-PRO_CALLTYPE
 CmpRpcArgsTypes(const CProStlVector<RPC_ARGUMENT>&  args,
                 const CProStlVector<RPC_DATA_TYPE>& types)
 {
@@ -1145,7 +1118,6 @@ CmpRpcArgsTypes(const CProStlVector<RPC_ARGUMENT>&  args,
 }
 
 bool
-PRO_CALLTYPE
 CmpRpcPacketTypes(const IRpcPacket*                   packet,
                   const CProStlVector<RPC_DATA_TYPE>& types)
 {

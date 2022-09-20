@@ -40,9 +40,9 @@ public:
 
     void Fini();
 
-    virtual unsigned long PRO_CALLTYPE AddRef();
+    virtual unsigned long AddRef();
 
-    virtual unsigned long PRO_CALLTYPE Release();
+    virtual unsigned long Release();
 
     RTP_MM_TYPE GetMmType() const;
 
@@ -56,7 +56,7 @@ private:
 
     virtual ~CTest();
 
-    virtual void PRO_CALLTYPE OnLogon(
+    virtual void OnLogon(
         IRpcClient* client,
         PRO_UINT64  myClientId,
         const char* myPublicIp
@@ -64,19 +64,19 @@ private:
     {
     }
 
-    virtual void PRO_CALLTYPE OnLogoff(
+    virtual void OnLogoff(
         IRpcClient* client,
         long        errorCode,
         long        sslCode,
         bool        tcpConnected
         );
 
-    virtual void PRO_CALLTYPE OnRpcResult(
+    virtual void OnRpcResult(
         IRpcClient* client,
         IRpcPacket* result
         );
 
-    virtual void PRO_CALLTYPE OnRecvMsgFromServer(
+    virtual void OnRecvMsgFromServer(
         IRpcClient*   client,
         const void*   buf,
         unsigned long size,
@@ -85,7 +85,7 @@ private:
     {
     }
 
-    virtual void PRO_CALLTYPE OnRecvMsgFromClient(
+    virtual void OnRecvMsgFromClient(
         IRpcClient*   client,
         const void*   buf,
         unsigned long size,

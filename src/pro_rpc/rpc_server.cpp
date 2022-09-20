@@ -46,7 +46,6 @@ typedef void (CRpcServer::* ACTION)(PRO_INT64*);
 
 static
 void
-PRO_CALLTYPE
 ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
              RPC_SERVER_CONFIG_INFO&               configInfo)
 {
@@ -217,7 +216,6 @@ CRpcServer::Fini()
 }
 
 unsigned long
-PRO_CALLTYPE
 CRpcServer::AddRef()
 {
     const unsigned long refCount = CMsgServer::AddRef();
@@ -226,7 +224,6 @@ CRpcServer::AddRef()
 }
 
 unsigned long
-PRO_CALLTYPE
 CRpcServer::Release()
 {
     const unsigned long refCount = CMsgServer::Release();
@@ -235,7 +232,6 @@ CRpcServer::Release()
 }
 
 RTP_MM_TYPE
-PRO_CALLTYPE
 CRpcServer::GetMmType() const
 {
     RTP_MM_TYPE mmType = 0;
@@ -250,7 +246,6 @@ CRpcServer::GetMmType() const
 }
 
 unsigned short
-PRO_CALLTYPE
 CRpcServer::GetServicePort() const
 {
     unsigned short servicePort = 0;
@@ -265,7 +260,6 @@ CRpcServer::GetServicePort() const
 }
 
 RPC_ERROR_CODE
-PRO_CALLTYPE
 CRpcServer::RegisterFunction(PRO_UINT32           functionId,
                              const RPC_DATA_TYPE* callArgTypes, /* = NULL */
                              size_t               callArgCount, /* = 0 */
@@ -334,7 +328,6 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
 }
 
 void
-PRO_CALLTYPE
 CRpcServer::UnregisterFunction(PRO_UINT32 functionId)
 {
     if (functionId == 0)
@@ -355,7 +348,6 @@ CRpcServer::UnregisterFunction(PRO_UINT32 functionId)
 }
 
 RPC_ERROR_CODE
-PRO_CALLTYPE
 CRpcServer::SendRpcResult(IRpcPacket* result)
 {
     assert(result != NULL);
@@ -401,7 +393,6 @@ CRpcServer::SendRpcResult(IRpcPacket* result)
 }
 
 bool
-PRO_CALLTYPE
 CRpcServer::SendMsgToClients(const void*       buf,
                              unsigned long     size,
                              PRO_UINT16        charset,
@@ -443,7 +434,6 @@ CRpcServer::SendMsgToClients(const void*       buf,
 }
 
 void
-PRO_CALLTYPE
 CRpcServer::KickoutClient(PRO_UINT64 clientId)
 {
     if (clientId == 0)
@@ -465,7 +455,6 @@ CRpcServer::KickoutClient(PRO_UINT64 clientId)
 }
 
 bool
-PRO_CALLTYPE
 CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
                         const RTP_MSG_USER* user,
                         const char*         userPublicIp,
@@ -500,7 +489,6 @@ CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
 }
 
 void
-PRO_CALLTYPE
 CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
                      const RTP_MSG_USER* user,
                      const char*         userPublicIp,
@@ -550,7 +538,6 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
 }
 
 void
-PRO_CALLTYPE
 CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
                         const RTP_MSG_USER* user,
                         long                errorCode,
@@ -596,7 +583,6 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
 }
 
 void
-PRO_CALLTYPE
 CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
                       const void*         buf,
                       unsigned long       size,

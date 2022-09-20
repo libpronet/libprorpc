@@ -180,7 +180,6 @@ CTest::Fini()
 }
 
 unsigned long
-PRO_CALLTYPE
 CTest::AddRef()
 {
     const unsigned long refCount = CProRefCount::AddRef();
@@ -189,7 +188,6 @@ CTest::AddRef()
 }
 
 unsigned long
-PRO_CALLTYPE
 CTest::Release()
 {
     const unsigned long refCount = CProRefCount::Release();
@@ -310,7 +308,6 @@ CTest::Test2(PRO_INT32       a,
 }
 
 void
-PRO_CALLTYPE
 CTest::OnLogoff(IRpcClient* client,
                 long        errorCode,
                 long        sslCode,
@@ -340,7 +337,6 @@ CTest::OnLogoff(IRpcClient* client,
 }
 
 void
-PRO_CALLTYPE
 CTest::OnRpcResult(IRpcClient* client,
                    IRpcPacket* result)
 {

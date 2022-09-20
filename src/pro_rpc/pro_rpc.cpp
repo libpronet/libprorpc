@@ -35,7 +35,6 @@ extern "C" {
 
 PRO_RPC_API
 IRpcClient*
-PRO_CALLTYPE
 CreateRpcClient(IRpcClientObserver* observer,
                 IProReactor*        reactor,
                 const char*         configFileName,
@@ -67,7 +66,6 @@ CreateRpcClient(IRpcClientObserver* observer,
 
 PRO_RPC_API
 void
-PRO_CALLTYPE
 DeleteRpcClient(IRpcClient* client)
 {
     if (client == NULL)
@@ -82,7 +80,6 @@ DeleteRpcClient(IRpcClient* client)
 
 PRO_RPC_API
 IRpcServer*
-PRO_CALLTYPE
 CreateRpcServer(IRpcServerObserver* observer,
                 IProReactor*        reactor,
                 const char*         configFileName,
@@ -110,7 +107,6 @@ CreateRpcServer(IRpcServerObserver* observer,
 
 PRO_RPC_API
 void
-PRO_CALLTYPE
 DeleteRpcServer(IRpcServer* server)
 {
     if (server == NULL)
@@ -125,7 +121,6 @@ DeleteRpcServer(IRpcServer* server)
 
 PRO_RPC_API
 IRpcPacket*
-PRO_CALLTYPE
 CreateRpcRequest(PRO_UINT32          functionId,
                  const RPC_ARGUMENT* args,  /* = NULL */
                  size_t              count) /* = 0 */
@@ -161,7 +156,6 @@ CreateRpcRequest(PRO_UINT32          functionId,
 
 PRO_RPC_API
 IRpcPacket*
-PRO_CALLTYPE
 CreateRpcResult(PRO_UINT64          clientId,
                 PRO_UINT64          requestId,
                 PRO_UINT32          functionId,
@@ -210,7 +204,6 @@ CreateRpcResult(PRO_UINT64          clientId,
 
 PRO_RPC_API
 IRpcPacket*
-PRO_CALLTYPE
 ParseRpcStreamToPacket(const void* streamBuffer,
                        size_t      streamSize)
 {

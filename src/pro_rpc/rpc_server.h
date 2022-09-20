@@ -75,15 +75,15 @@ public:
 
     void Fini();
 
-    virtual unsigned long PRO_CALLTYPE AddRef();
+    virtual unsigned long AddRef();
 
-    virtual unsigned long PRO_CALLTYPE Release();
+    virtual unsigned long Release();
 
-    virtual RTP_MM_TYPE PRO_CALLTYPE GetMmType() const;
+    virtual RTP_MM_TYPE GetMmType() const;
 
-    virtual unsigned short PRO_CALLTYPE GetServicePort() const;
+    virtual unsigned short GetServicePort() const;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE RegisterFunction(
+    virtual RPC_ERROR_CODE RegisterFunction(
         PRO_UINT32           functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
@@ -91,11 +91,11 @@ public:
         size_t               retnArgCount  /* = 0 */
         );
 
-    virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId);
+    virtual void UnregisterFunction(PRO_UINT32 functionId);
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcResult(IRpcPacket* result);
+    virtual RPC_ERROR_CODE SendRpcResult(IRpcPacket* result);
 
-    virtual bool PRO_CALLTYPE SendMsgToClients(
+    virtual bool SendMsgToClients(
         const void*       buf,
         unsigned long     size,
         PRO_UINT16        charset,
@@ -103,7 +103,7 @@ public:
         unsigned char     dstClientCount
         );
 
-    virtual void PRO_CALLTYPE KickoutClient(PRO_UINT64 clientId);
+    virtual void KickoutClient(PRO_UINT64 clientId);
 
 private:
 
@@ -111,7 +111,7 @@ private:
 
     virtual ~CRpcServer();
 
-    virtual bool PRO_CALLTYPE OnCheckUser(
+    virtual bool OnCheckUser(
         IRtpMsgServer*      msgServer,
         const RTP_MSG_USER* user,
         const char*         userPublicIp,
@@ -124,7 +124,7 @@ private:
         bool*               isC2s
         );
 
-    virtual void PRO_CALLTYPE OnOkUser(
+    virtual void OnOkUser(
         IRtpMsgServer*      msgServer,
         const RTP_MSG_USER* user,
         const char*         userPublicIp,
@@ -132,14 +132,14 @@ private:
         PRO_INT64           appData
         );
 
-    virtual void PRO_CALLTYPE OnCloseUser(
+    virtual void OnCloseUser(
         IRtpMsgServer*      msgServer,
         const RTP_MSG_USER* user,
         long                errorCode,
         long                sslCode
         );
 
-    virtual void PRO_CALLTYPE OnRecvMsg(
+    virtual void OnRecvMsg(
         IRtpMsgServer*      msgServer,
         const void*         buf,
         unsigned long       size,

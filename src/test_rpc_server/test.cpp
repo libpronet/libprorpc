@@ -168,7 +168,6 @@ CTest::Fini()
 }
 
 unsigned long
-PRO_CALLTYPE
 CTest::AddRef()
 {
     const unsigned long refCount = CProRefCount::AddRef();
@@ -177,7 +176,6 @@ CTest::AddRef()
 }
 
 unsigned long
-PRO_CALLTYPE
 CTest::Release()
 {
     const unsigned long refCount = CProRefCount::Release();
@@ -220,7 +218,6 @@ CTest::GetServicePort() const
 }
 
 void
-PRO_CALLTYPE
 CTest::OnRpcRequest(IRpcServer* server,
                     IRpcPacket* request)
 {

@@ -32,11 +32,13 @@ extern "C" {
 #if defined(PRO_RPC_EXPORTS)
 #if defined(_MSC_VER)
 #define PRO_RPC_API /* using xxx.def */
+#elif defined(__MINGW32__) || defined(__CYGWIN__)
+#define PRO_RPC_API __declspec(dllexport)
 #else
-#define PRO_RPC_API PRO_EXPORT
+#define PRO_RPC_API __attribute__((visibility("default")))
 #endif
 #else
-#define PRO_RPC_API PRO_IMPORT
+#define PRO_RPC_API
 #endif
 
 /*
@@ -404,45 +406,45 @@ public:
 
     virtual ~IRpcPacket() {}
 
-    virtual unsigned long PRO_CALLTYPE AddRef() = 0;
+    virtual unsigned long AddRef() = 0;
 
-    virtual unsigned long PRO_CALLTYPE Release() = 0;
+    virtual unsigned long Release() = 0;
 
-    virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const = 0;
+    virtual PRO_UINT64 GetClientId() const = 0;
 
-    virtual PRO_UINT64 PRO_CALLTYPE GetRequestId() const = 0;
+    virtual PRO_UINT64 GetRequestId() const = 0;
 
-    virtual PRO_UINT32 PRO_CALLTYPE GetFunctionId() const = 0;
+    virtual PRO_UINT32 GetFunctionId() const = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE GetRpcCode() const = 0;
+    virtual RPC_ERROR_CODE GetRpcCode() const = 0;
 
-    virtual bool PRO_CALLTYPE GetNoreply() const = 0;
+    virtual bool GetNoreply() const = 0;
 
-    virtual unsigned long PRO_CALLTYPE GetArgumentCount() const = 0;
+    virtual unsigned long GetArgumentCount() const = 0;
 
-    virtual void PRO_CALLTYPE GetArgument(
+    virtual void GetArgument(
         unsigned long index,
         RPC_ARGUMENT* arg
         ) const = 0;
 
-    virtual void PRO_CALLTYPE GetArguments(
+    virtual void GetArguments(
         RPC_ARGUMENT* args,
         size_t        count
         ) const = 0;
 
-    virtual void* PRO_CALLTYPE GetTotalBuffer() = 0;
+    virtual void* GetTotalBuffer() = 0;
 
-    virtual const void* PRO_CALLTYPE GetTotalBuffer() const = 0;
+    virtual const void* GetTotalBuffer() const = 0;
 
-    virtual unsigned long PRO_CALLTYPE GetTotalSize() const = 0;
+    virtual unsigned long GetTotalSize() const = 0;
 
-    virtual void PRO_CALLTYPE SetMagic1(PRO_INT64 magic1) = 0;
+    virtual void SetMagic1(PRO_INT64 magic1) = 0;
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic1() const = 0;
+    virtual PRO_INT64 GetMagic1() const = 0;
 
-    virtual void PRO_CALLTYPE SetMagic2(PRO_INT64 magic2) = 0;
+    virtual void SetMagic2(PRO_INT64 magic2) = 0;
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic2() const = 0;
+    virtual PRO_INT64 GetMagic2() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -454,23 +456,23 @@ public:
 
     virtual ~IRpcClient() {}
 
-    virtual unsigned long PRO_CALLTYPE AddRef() = 0;
+    virtual unsigned long AddRef() = 0;
 
-    virtual unsigned long PRO_CALLTYPE Release() = 0;
+    virtual unsigned long Release() = 0;
 
-    virtual RTP_MM_TYPE PRO_CALLTYPE GetMmType() const = 0;
+    virtual RTP_MM_TYPE GetMmType() const = 0;
 
-    virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const = 0;
+    virtual PRO_UINT64 GetClientId() const = 0;
 
-    virtual const char* PRO_CALLTYPE GetServerIp(char serverIp[64]) const = 0;
+    virtual const char* GetServerIp(char serverIp[64]) const = 0;
 
-    virtual unsigned short PRO_CALLTYPE GetServerPort() const = 0;
+    virtual unsigned short GetServerPort() const = 0;
 
-    virtual const char* PRO_CALLTYPE GetLocalIp(char localIp[64]) const = 0;
+    virtual const char* GetLocalIp(char localIp[64]) const = 0;
 
-    virtual unsigned short PRO_CALLTYPE GetLocalPort() const = 0;
+    virtual unsigned short GetLocalPort() const = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE RegisterFunction(
+    virtual RPC_ERROR_CODE RegisterFunction(
         PRO_UINT32           functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
@@ -478,21 +480,21 @@ public:
         size_t               retnArgCount  /* = 0 */
         ) = 0;
 
-    virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId) = 0;
+    virtual void UnregisterFunction(PRO_UINT32 functionId) = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcRequest(
+    virtual RPC_ERROR_CODE SendRpcRequest(
         IRpcPacket*   request,
         bool          noreply             = false,
         unsigned long rpcTimeoutInSeconds = 0
         ) = 0;
 
-    virtual bool PRO_CALLTYPE SendMsgToServer(
+    virtual bool SendMsgToServer(
         const void*       buf,
         unsigned long     size,
         PRO_UINT16        charset
         ) = 0;
 
-    virtual bool PRO_CALLTYPE SendMsgToClients(
+    virtual bool SendMsgToClients(
         const void*       buf,
         unsigned long     size,
         PRO_UINT16        charset,
@@ -500,11 +502,11 @@ public:
         unsigned char     dstClientCount
         ) = 0;
 
-    virtual bool PRO_CALLTYPE Reconnect() = 0;
+    virtual bool Reconnect() = 0;
 
-    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic) = 0;
+    virtual void SetMagic(PRO_INT64 magic) = 0;
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const = 0;
+    virtual PRO_INT64 GetMagic() const = 0;
 };
 
 class IRpcClientObserver
@@ -513,36 +515,36 @@ public:
 
     virtual ~IRpcClientObserver() {}
 
-    virtual unsigned long PRO_CALLTYPE AddRef() = 0;
+    virtual unsigned long AddRef() = 0;
 
-    virtual unsigned long PRO_CALLTYPE Release() = 0;
+    virtual unsigned long Release() = 0;
 
-    virtual void PRO_CALLTYPE OnLogon(
+    virtual void OnLogon(
         IRpcClient* client,
         PRO_UINT64  myClientId,
         const char* myPublicIp
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnLogoff(
+    virtual void OnLogoff(
         IRpcClient* client,
         long        errorCode,
         long        sslCode,
         bool        tcpConnected
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnRpcResult(
+    virtual void OnRpcResult(
         IRpcClient* client,
         IRpcPacket* result
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnRecvMsgFromServer(
+    virtual void OnRecvMsgFromServer(
         IRpcClient*   client,
         const void*   buf,
         unsigned long size,
         PRO_UINT16    charset
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnRecvMsgFromClient(
+    virtual void OnRecvMsgFromClient(
         IRpcClient*   client,
         const void*   buf,
         unsigned long size,
@@ -560,15 +562,15 @@ public:
 
     virtual ~IRpcServer() {}
 
-    virtual unsigned long PRO_CALLTYPE AddRef() = 0;
+    virtual unsigned long AddRef() = 0;
 
-    virtual unsigned long PRO_CALLTYPE Release() = 0;
+    virtual unsigned long Release() = 0;
 
-    virtual RTP_MM_TYPE PRO_CALLTYPE GetMmType() const = 0;
+    virtual RTP_MM_TYPE GetMmType() const = 0;
 
-    virtual unsigned short PRO_CALLTYPE GetServicePort() const = 0;
+    virtual unsigned short GetServicePort() const = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE RegisterFunction(
+    virtual RPC_ERROR_CODE RegisterFunction(
         PRO_UINT32           functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
@@ -576,11 +578,11 @@ public:
         size_t               retnArgCount  /* = 0 */
         ) = 0;
 
-    virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId) = 0;
+    virtual void UnregisterFunction(PRO_UINT32 functionId) = 0;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcResult(IRpcPacket* result) = 0;
+    virtual RPC_ERROR_CODE SendRpcResult(IRpcPacket* result) = 0;
 
-    virtual bool PRO_CALLTYPE SendMsgToClients(
+    virtual bool SendMsgToClients(
         const void*       buf,
         unsigned long     size,
         PRO_UINT16        charset,
@@ -588,7 +590,7 @@ public:
         unsigned char     dstClientCount
         ) = 0;
 
-    virtual void PRO_CALLTYPE KickoutClient(PRO_UINT64 clientId) = 0;
+    virtual void KickoutClient(PRO_UINT64 clientId) = 0;
 };
 
 class IRpcServerObserver
@@ -597,29 +599,29 @@ public:
 
     virtual ~IRpcServerObserver() {}
 
-    virtual unsigned long PRO_CALLTYPE AddRef() = 0;
+    virtual unsigned long AddRef() = 0;
 
-    virtual unsigned long PRO_CALLTYPE Release() = 0;
+    virtual unsigned long Release() = 0;
 
-    virtual void PRO_CALLTYPE OnLogon(
+    virtual void OnLogon(
         IRpcServer* server,
         PRO_UINT64  clientId,
         const char* clientPublicIp
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnLogoff(
+    virtual void OnLogoff(
         IRpcServer* server,
         PRO_UINT64  clientId,
         long        errorCode,
         long        sslCode
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnRpcRequest(
+    virtual void OnRpcRequest(
         IRpcServer* server,
         IRpcPacket* request
         ) = 0;
 
-    virtual void PRO_CALLTYPE OnRecvMsg(
+    virtual void OnRecvMsg(
         IRpcServer*   server,
         const void*   buf,
         unsigned long size,
@@ -633,7 +635,6 @@ public:
 
 PRO_RPC_API
 IRpcClient*
-PRO_CALLTYPE
 CreateRpcClient(IRpcClientObserver* observer,
                 IProReactor*        reactor,
                 const char*         configFileName,
@@ -646,12 +647,10 @@ CreateRpcClient(IRpcClientObserver* observer,
 
 PRO_RPC_API
 void
-PRO_CALLTYPE
 DeleteRpcClient(IRpcClient* client);
 
 PRO_RPC_API
 IRpcServer*
-PRO_CALLTYPE
 CreateRpcServer(IRpcServerObserver* observer,
                 IProReactor*        reactor,
                 const char*         configFileName,
@@ -660,19 +659,16 @@ CreateRpcServer(IRpcServerObserver* observer,
 
 PRO_RPC_API
 void
-PRO_CALLTYPE
 DeleteRpcServer(IRpcServer* server);
 
 PRO_RPC_API
 IRpcPacket*
-PRO_CALLTYPE
 CreateRpcRequest(PRO_UINT32          functionId,
                  const RPC_ARGUMENT* args,   /* = NULL */
                  size_t              count); /* = 0 */
 
 PRO_RPC_API
 IRpcPacket*
-PRO_CALLTYPE
 CreateRpcResult(PRO_UINT64          clientId,
                 PRO_UINT64          requestId,
                 PRO_UINT32          functionId,
@@ -682,7 +678,6 @@ CreateRpcResult(PRO_UINT64          clientId,
 
 PRO_RPC_API
 IRpcPacket*
-PRO_CALLTYPE
 ParseRpcStreamToPacket(const void* streamBuffer,
                        size_t      streamSize);
 

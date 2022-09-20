@@ -89,23 +89,23 @@ public:
 
     void Fini();
 
-    virtual unsigned long PRO_CALLTYPE AddRef();
+    virtual unsigned long AddRef();
 
-    virtual unsigned long PRO_CALLTYPE Release();
+    virtual unsigned long Release();
 
-    virtual RTP_MM_TYPE PRO_CALLTYPE GetMmType() const;
+    virtual RTP_MM_TYPE GetMmType() const;
 
-    virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const;
+    virtual PRO_UINT64 GetClientId() const;
 
-    virtual const char* PRO_CALLTYPE GetServerIp(char serverIp[64]) const;
+    virtual const char* GetServerIp(char serverIp[64]) const;
 
-    virtual unsigned short PRO_CALLTYPE GetServerPort() const;
+    virtual unsigned short GetServerPort() const;
 
-    virtual const char* PRO_CALLTYPE GetLocalIp(char localIp[64]) const;
+    virtual const char* GetLocalIp(char localIp[64]) const;
 
-    virtual unsigned short PRO_CALLTYPE GetLocalPort() const;
+    virtual unsigned short GetLocalPort() const;
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE RegisterFunction(
+    virtual RPC_ERROR_CODE RegisterFunction(
         PRO_UINT32           functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
@@ -113,21 +113,21 @@ public:
         size_t               retnArgCount  /* = 0 */
         );
 
-    virtual void PRO_CALLTYPE UnregisterFunction(PRO_UINT32 functionId);
+    virtual void UnregisterFunction(PRO_UINT32 functionId);
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE SendRpcRequest(
+    virtual RPC_ERROR_CODE SendRpcRequest(
         IRpcPacket*   request,
         bool          noreply,            /* = false */
         unsigned long rpcTimeoutInSeconds /* = 0 */
         );
 
-    virtual bool PRO_CALLTYPE SendMsgToServer(
+    virtual bool SendMsgToServer(
         const void*       buf,
         unsigned long     size,
         PRO_UINT16        charset
         );
 
-    virtual bool PRO_CALLTYPE SendMsgToClients(
+    virtual bool SendMsgToClients(
         const void*       buf,
         unsigned long     size,
         PRO_UINT16        charset,
@@ -135,11 +135,11 @@ public:
         unsigned char     dstClientCount
         );
 
-    virtual bool PRO_CALLTYPE Reconnect();
+    virtual bool Reconnect();
 
-    virtual void PRO_CALLTYPE SetMagic(PRO_INT64 magic);
+    virtual void SetMagic(PRO_INT64 magic);
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic() const;
+    virtual PRO_INT64 GetMagic() const;
 
 private:
 
@@ -147,13 +147,13 @@ private:
 
     virtual ~CRpcClient();
 
-    virtual void PRO_CALLTYPE OnOkMsg(
+    virtual void OnOkMsg(
         IRtpMsgClient*      msgClient,
         const RTP_MSG_USER* myUser,
         const char*         myPublicIp
         );
 
-    virtual void PRO_CALLTYPE OnRecvMsg(
+    virtual void OnRecvMsg(
         IRtpMsgClient*      msgClient,
         const void*         buf,
         unsigned long       size,
@@ -161,14 +161,14 @@ private:
         const RTP_MSG_USER* srcUser
         );
 
-    virtual void PRO_CALLTYPE OnCloseMsg(
+    virtual void OnCloseMsg(
         IRtpMsgClient* msgClient,
         long           errorCode,
         long           sslCode,
         bool           tcpConnected
         );
 
-    virtual void PRO_CALLTYPE OnTimer(
+    virtual void OnTimer(
         void*      factory,
         PRO_UINT64 timerId,
         PRO_INT64  userData

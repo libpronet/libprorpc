@@ -62,59 +62,59 @@ public:
         CProStlVector<RPC_ARGUMENT>& args
         );
 
-    virtual unsigned long PRO_CALLTYPE AddRef();
+    virtual unsigned long AddRef();
 
-    virtual unsigned long PRO_CALLTYPE Release();
+    virtual unsigned long Release();
 
     void SetClientId(PRO_UINT64 clientId);
 
-    virtual PRO_UINT64 PRO_CALLTYPE GetClientId() const;
+    virtual PRO_UINT64 GetClientId() const;
 
     void SetRequestId(PRO_UINT64 requestId);
 
-    virtual PRO_UINT64 PRO_CALLTYPE GetRequestId() const;
+    virtual PRO_UINT64 GetRequestId() const;
 
     void SetFunctionId(PRO_UINT32 functionId);
 
-    virtual PRO_UINT32 PRO_CALLTYPE GetFunctionId() const;
+    virtual PRO_UINT32 GetFunctionId() const;
 
     void SetRpcCode(RPC_ERROR_CODE rpcCode);
 
-    virtual RPC_ERROR_CODE PRO_CALLTYPE GetRpcCode() const;
+    virtual RPC_ERROR_CODE GetRpcCode() const;
 
     void SetNoreply(bool noreply);
 
-    virtual bool PRO_CALLTYPE GetNoreply() const;
+    virtual bool GetNoreply() const;
 
     void SetTimeout(PRO_UINT32 timeoutInSeconds);
 
     PRO_UINT32 GetTimeout() const;
 
-    virtual unsigned long PRO_CALLTYPE GetArgumentCount() const;
+    virtual unsigned long GetArgumentCount() const;
 
-    virtual void PRO_CALLTYPE GetArgument(
+    virtual void GetArgument(
         unsigned long index,
         RPC_ARGUMENT* arg
         ) const;
 
-    virtual void PRO_CALLTYPE GetArguments(
+    virtual void GetArguments(
         RPC_ARGUMENT* args,
         size_t        count
         ) const;
 
-    virtual void* PRO_CALLTYPE GetTotalBuffer();
+    virtual void* GetTotalBuffer();
 
-    virtual const void* PRO_CALLTYPE GetTotalBuffer() const;
+    virtual const void* GetTotalBuffer() const;
 
-    virtual unsigned long PRO_CALLTYPE GetTotalSize() const;
+    virtual unsigned long GetTotalSize() const;
 
-    virtual void PRO_CALLTYPE SetMagic1(PRO_INT64 magic1);
+    virtual void SetMagic1(PRO_INT64 magic1);
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic1() const;
+    virtual PRO_INT64 GetMagic1() const;
 
-    virtual void PRO_CALLTYPE SetMagic2(PRO_INT64 magic2);
+    virtual void SetMagic2(PRO_INT64 magic2);
 
-    virtual PRO_INT64 PRO_CALLTYPE GetMagic2() const;
+    virtual PRO_INT64 GetMagic2() const;
 
     /*
      * [[[[ push arguments
@@ -168,16 +168,13 @@ private:
 ////
 
 bool
-PRO_CALLTYPE
 CheckRpcDataType(RPC_DATA_TYPE type);
 
 bool
-PRO_CALLTYPE
 CmpRpcArgsTypes(const CProStlVector<RPC_ARGUMENT>&  args,
                 const CProStlVector<RPC_DATA_TYPE>& types);
 
 bool
-PRO_CALLTYPE
 CmpRpcPacketTypes(const IRpcPacket*                   packet,
                   const CProStlVector<RPC_DATA_TYPE>& types);
 
