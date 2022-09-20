@@ -47,7 +47,40 @@ CreateRpcClient(IRpcClientObserver* observer,
 {
     ProRtpInit();
 
-    CRpcClient* const client = CRpcClient::CreateInstance();
+    CRpcClient* const client = CRpcClient::CreateInstance(0, 0);
+    if (client == NULL)
+    {
+        return (NULL);
+    }
+
+    if (!client->Init(observer, reactor, configFileName,
+        mmType, serverIp, serverPort, user, password, localIp))
+    {
+        client->Release();
+
+        return (NULL);
+    }
+
+    return (client);
+}
+
+PRO_RPC_API
+IRpcClient*
+CreateRpcClient2(IRpcClientObserver* observer,
+                 IProReactor*        reactor,
+                 const char*         configFileName,
+                 RTP_MM_TYPE         mmType,     /* = 0 */
+                 const char*         serverIp,   /* = NULL */
+                 unsigned short      serverPort, /* = 0 */
+                 const RTP_MSG_USER* user,       /* = NULL */
+                 const char*         password,   /* = NULL */
+                 const char*         localIp,    /* = NULL */
+                 PRO_INT64           magic,      /* = 0 */
+                 PRO_INT64           magic2)     /* = 0 */
+{
+    ProRtpInit();
+
+    CRpcClient* const client = CRpcClient::CreateInstance(magic, magic2);
     if (client == NULL)
     {
         return (NULL);

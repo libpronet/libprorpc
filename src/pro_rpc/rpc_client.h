@@ -73,7 +73,10 @@ public CMsgClient
 {
 public:
 
-    static CRpcClient* CreateInstance();
+    static CRpcClient* CreateInstance(
+        PRO_INT64 magic, /* = 0 */
+        PRO_INT64 magic2 /* = 0 */
+        );
 
     bool Init(
         IRpcClientObserver* observer,
@@ -141,9 +144,16 @@ public:
 
     virtual PRO_INT64 GetMagic() const;
 
+    virtual void SetMagic2(PRO_INT64 magic2);
+
+    virtual PRO_INT64 GetMagic2() const;
+
 private:
 
-    CRpcClient();
+    CRpcClient(
+        PRO_INT64 magic, /* = 0 */
+        PRO_INT64 magic2 /* = 0 */
+        );
 
     virtual ~CRpcClient();
 
@@ -195,6 +205,7 @@ private:
     CRpcPacket*                               m_packet;
     PRO_UINT64                                m_clientId;
     PRO_INT64                                 m_magic;
+    PRO_INT64                                 m_magic2;
 
     CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO> m_funtionId2Info;
     CProStlMap<PRO_UINT64, RPC_HDR2>          m_timerId2Hdr;

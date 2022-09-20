@@ -507,6 +507,10 @@ public:
     virtual void SetMagic(PRO_INT64 magic) = 0;
 
     virtual PRO_INT64 GetMagic() const = 0;
+
+    virtual void SetMagic2(PRO_INT64 magic2) = 0;
+
+    virtual PRO_INT64 GetMagic2() const = 0;
 };
 
 class IRpcClientObserver
@@ -644,6 +648,20 @@ CreateRpcClient(IRpcClientObserver* observer,
                 const RTP_MSG_USER* user,       /* = NULL */
                 const char*         password,   /* = NULL */
                 const char*         localIp);   /* = NULL */
+
+PRO_RPC_API
+IRpcClient*
+CreateRpcClient2(IRpcClientObserver* observer,
+                 IProReactor*        reactor,
+                 const char*         configFileName,
+                 RTP_MM_TYPE         mmType,     /* = 0 */
+                 const char*         serverIp,   /* = NULL */
+                 unsigned short      serverPort, /* = 0 */
+                 const RTP_MSG_USER* user,       /* = NULL */
+                 const char*         password,   /* = NULL */
+                 const char*         localIp,    /* = NULL */
+                 PRO_INT64           magic,      /* = 0 */
+                 PRO_INT64           magic2);    /* = 0 */
 
 PRO_RPC_API
 void

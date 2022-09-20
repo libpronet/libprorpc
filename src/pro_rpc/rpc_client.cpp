@@ -82,19 +82,22 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
 ////
 
 CRpcClient*
-CRpcClient::CreateInstance()
+CRpcClient::CreateInstance(PRO_INT64 magic,  /* = 0 */
+                           PRO_INT64 magic2) /* = 0 */
 {
-    CRpcClient* const client = new CRpcClient;
+    CRpcClient* const client = new CRpcClient(magic, magic2);
 
     return (client);
 }
 
-CRpcClient::CRpcClient()
+CRpcClient::CRpcClient(PRO_INT64 magic,  /* = 0 */
+                       PRO_INT64 magic2) /* = 0 */
 {
     m_observer = NULL;
     m_packet   = NULL;
     m_clientId = 0;
-    m_magic    = 0;
+    m_magic    = magic;
+    m_magic2   = magic2;
 }
 
 CRpcClient::~CRpcClient()
@@ -569,6 +572,30 @@ CRpcClient::GetMagic() const
     }
 
     return (magic);
+}
+
+void
+CRpcClient::SetMagic2(PRO_INT64 magic2)
+{
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        m_magic2 = magic2;
+    }
+}
+
+PRO_INT64
+CRpcClient::GetMagic2() const
+{
+    PRO_INT64 magic2 = 0;
+
+    {
+        CProThreadMutexGuard mon(m_lock);
+
+        magic2 = m_magic2;
+    }
+
+    return (magic2);
 }
 
 void
