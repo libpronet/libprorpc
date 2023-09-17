@@ -23,8 +23,8 @@
 #include "pronet/pro_memory_pool.h"
 #include "pronet/pro_ref_count.h"
 #include "pronet/pro_stl.h"
+#include "pronet/pro_thread_mutex.h"
 #include "pronet/pro_z.h"
-#include <cassert>
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -56,9 +56,9 @@ MakeRequestId_i()
 
 static
 void
-Reverse16_i(PRO_UINT16& var)
+Reverse16_i(uint16_t& var)
 {
-    PRO_UINT16 ret = 0;
+    uint16_t ret = 0;
 
     ret |= (var >> 8) & 0x00FF;
     ret |= (var << 8) & 0xFF00;
@@ -68,8 +68,8 @@ Reverse16_i(PRO_UINT16& var)
 
 static
 void
-Reverse16s_i(PRO_UINT16* vars,
-             size_t      size)
+Reverse16s_i(uint16_t* vars,
+             size_t    size)
 {
     if (vars == NULL || size == 0)
     {
@@ -78,8 +78,8 @@ Reverse16s_i(PRO_UINT16* vars,
 
     for (int i = 0; i < (int)size; ++i)
     {
-        PRO_UINT16& var = vars[i];
-        PRO_UINT16  ret = 0;
+        uint16_t& var = vars[i];
+        uint16_t  ret = 0;
 
         ret |= (var >> 8) & 0x00FF;
         ret |= (var << 8) & 0xFF00;
@@ -90,9 +90,9 @@ Reverse16s_i(PRO_UINT16* vars,
 
 static
 void
-Reverse32_i(PRO_UINT32& var)
+Reverse32_i(uint32_t& var)
 {
-    PRO_UINT32 ret = 0;
+    uint32_t ret = 0;
 
     ret |= (var >> 24) & 0x000000FF;
     ret |= (var >>  8) & 0x0000FF00;
@@ -104,8 +104,8 @@ Reverse32_i(PRO_UINT32& var)
 
 static
 void
-Reverse32s_i(PRO_UINT32* vars,
-             size_t      size)
+Reverse32s_i(uint32_t* vars,
+             size_t    size)
 {
     if (vars == NULL || size == 0)
     {
@@ -114,8 +114,8 @@ Reverse32s_i(PRO_UINT32* vars,
 
     for (int i = 0; i < (int)size; ++i)
     {
-        PRO_UINT32& var = vars[i];
-        PRO_UINT32  ret = 0;
+        uint32_t& var = vars[i];
+        uint32_t  ret = 0;
 
         ret |= (var >> 24) & 0x000000FF;
         ret |= (var >>  8) & 0x0000FF00;
@@ -128,12 +128,12 @@ Reverse32s_i(PRO_UINT32* vars,
 
 static
 void
-Reverse64_i(PRO_UINT64& var)
+Reverse64_i(uint64_t& var)
 {
-    PRO_UINT64 ret = 0;
+    uint64_t ret = 0;
 
-    PRO_UINT32 high = (PRO_UINT32)(var >> 32);
-    PRO_UINT32 low  = (PRO_UINT32)var;
+    uint32_t high = (uint32_t)(var >> 32);
+    uint32_t low  = (uint32_t)var;
 
     Reverse32_i(high);
     Reverse32_i(low);
@@ -147,8 +147,8 @@ Reverse64_i(PRO_UINT64& var)
 
 static
 void
-Reverse64s_i(PRO_UINT64* vars,
-             size_t      size)
+Reverse64s_i(uint64_t* vars,
+             size_t    size)
 {
     if (vars == NULL || size == 0)
     {
@@ -157,11 +157,11 @@ Reverse64s_i(PRO_UINT64* vars,
 
     for (int i = 0; i < (int)size; ++i)
     {
-        PRO_UINT64& var = vars[i];
-        PRO_UINT64  ret = 0;
+        uint64_t& var = vars[i];
+        uint64_t  ret = 0;
 
-        PRO_UINT32 high = (PRO_UINT32)(var >> 32);
-        PRO_UINT32 low  = (PRO_UINT32)var;
+        uint32_t high = (uint32_t)(var >> 32);
+        uint32_t low  = (uint32_t)var;
 
         Reverse32_i(high);
         Reverse32_i(low);
@@ -241,7 +241,7 @@ GetNaluSize_i(const RPC_ARGUMENT& arg)
             size = 0;
             break;
         }
-    } /* end of switch (...) */
+    } /* end of switch () */
 
     return (size);
 }
@@ -386,8 +386,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     }
                     else
                     {
-                        const unsigned long bodySize =
-                            (1 * arg.countForArray + 3) / 4 * 4;
+                        const unsigned long bodySize = (1 * arg.countForArray + 3) / 4 * 4;
                         needSize += bodySize;
                         if (size < needSize)
                         {
@@ -412,15 +411,14 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     }
                     else
                     {
-                        const unsigned long bodySize =
-                            (2 * arg.countForArray + 3) / 4 * 4;
+                        const unsigned long bodySize = (2 * arg.countForArray + 3) / 4 * 4;
                         needSize += bodySize;
                         if (size < needSize)
                         {
                             break;
                         }
 
-                        arg.uint16Values = (PRO_UINT16*)now;
+                        arg.uint16Values = (uint16_t*)now;
                         now += bodySize;
                     }
 
@@ -446,7 +444,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                             break;
                         }
 
-                        arg.uint32Values = (PRO_UINT32*)now;
+                        arg.uint32Values = (uint32_t*)now;
                         now += bodySize;
                     }
 
@@ -472,7 +470,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                             break;
                         }
 
-                        arg.uint64Values = (PRO_UINT64*)now;
+                        arg.uint64Values = (uint64_t*)now;
                         now += bodySize;
                     }
 
@@ -480,13 +478,13 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     ret2 = true;
                     break;
                 }
-            } /* end of switch (...) */
+            } /* end of switch () */
 
             if (!ret2)
             {
                 break;
             }
-        } /* end of while (...) */
+        } /* end of while () */
     }
     while (0);
 
@@ -502,8 +500,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
 CRpcPacket::CRpcPacket(PRO_UINT64 requestId,
                        PRO_UINT32 functionId,
                        bool       convertByteOrder) /* = false */
-                       :
-m_convertByteOrder(convertByteOrder)
+: m_convertByteOrder(convertByteOrder)
 {
     m_clientId             = 0;
     m_magic1               = 0;
@@ -702,7 +699,7 @@ CRpcPacket::GetTotalBuffer() const
 unsigned long
 CRpcPacket::GetTotalSize() const
 {
-    return (m_buffer.Size());
+    return (unsigned long)m_buffer.Size();
 }
 
 void
@@ -788,7 +785,7 @@ CRpcPacket::PushArgument(RPC_ARGUMENT                 arg,
             ret = false;
             break;
         }
-    } /* end of switch (...) */
+    } /* end of switch () */
 
     if (ret)
     {
@@ -947,8 +944,7 @@ CRpcPacket::EndPushArgument()
                 {
                     memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint8Values,
                         1 * srcArg.countForArray);
-                    dstArg.uint8Values =
-                        (unsigned char*)(now + sizeof(RPC_ARGUMENT));
+                    dstArg.uint8Values = (unsigned char*)(now + sizeof(RPC_ARGUMENT));
                 }
 
                 srcArg = dstArg;
@@ -965,15 +961,11 @@ CRpcPacket::EndPushArgument()
                 {
                     memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint16Values,
                         2 * srcArg.countForArray);
-                    dstArg.uint16Values =
-                        (PRO_UINT16*)(now + sizeof(RPC_ARGUMENT));
+                    dstArg.uint16Values = (uint16_t*)(now + sizeof(RPC_ARGUMENT));
 
                     if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
                     {
-                        Reverse16s_i(
-                            (PRO_UINT16*)dstArg.uint16Values,
-                            dstArg.countForArray
-                            );
+                        Reverse16s_i((uint16_t*)dstArg.uint16Values, dstArg.countForArray);
                         dstArg.bigEndian_r = bigEndian;
                     }
                 }
@@ -993,15 +985,11 @@ CRpcPacket::EndPushArgument()
                 {
                     memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint32Values,
                         4 * srcArg.countForArray);
-                    dstArg.uint32Values =
-                        (PRO_UINT32*)(now + sizeof(RPC_ARGUMENT));
+                    dstArg.uint32Values = (uint32_t*)(now + sizeof(RPC_ARGUMENT));
 
                     if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
                     {
-                        Reverse32s_i(
-                            (PRO_UINT32*)dstArg.uint32Values,
-                            dstArg.countForArray
-                            );
+                        Reverse32s_i((uint32_t*)dstArg.uint32Values, dstArg.countForArray);
                         dstArg.bigEndian_r = bigEndian;
                     }
                 }
@@ -1021,15 +1009,11 @@ CRpcPacket::EndPushArgument()
                 {
                     memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint64Values,
                         8 * srcArg.countForArray);
-                    dstArg.uint64Values =
-                        (PRO_UINT64*)(now + sizeof(RPC_ARGUMENT));
+                    dstArg.uint64Values = (uint64_t*)(now + sizeof(RPC_ARGUMENT));
 
                     if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
                     {
-                        Reverse64s_i(
-                            (PRO_UINT64*)dstArg.uint64Values,
-                            dstArg.countForArray
-                            );
+                        Reverse64s_i((uint64_t*)dstArg.uint64Values, dstArg.countForArray);
                         dstArg.bigEndian_r = bigEndian;
                     }
                 }
@@ -1042,10 +1026,10 @@ CRpcPacket::EndPushArgument()
                 assert(0);
                 break;
             }
-        } /* end of switch (...) */
+        } /* end of switch () */
 
         now += naluSizes[i];
-    } /* end of for (...) */
+    } /* end of for () */
 
     return (true);
 }

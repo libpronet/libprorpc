@@ -121,42 +121,42 @@ struct RPC_ARGUMENT
         uint8Value = var;
     }
 
-    explicit RPC_ARGUMENT(PRO_INT16 var)
+    explicit RPC_ARGUMENT(int16_t var)
     {
         Reset();
         type       = RPC_DT_INT16;
         int16Value = var;
     }
 
-    explicit RPC_ARGUMENT(PRO_UINT16 var)
+    explicit RPC_ARGUMENT(uint16_t var)
     {
         Reset();
         type        = RPC_DT_UINT16;
         uint16Value = var;
     }
 
-    explicit RPC_ARGUMENT(PRO_INT32 var)
+    explicit RPC_ARGUMENT(int32_t var)
     {
         Reset();
         type       = RPC_DT_INT32;
         int32Value = var;
     }
 
-    explicit RPC_ARGUMENT(PRO_UINT32 var)
+    explicit RPC_ARGUMENT(uint32_t var)
     {
         Reset();
         type        = RPC_DT_UINT32;
         uint32Value = var;
     }
 
-    explicit RPC_ARGUMENT(PRO_INT64 var)
+    explicit RPC_ARGUMENT(int64_t var)
     {
         Reset();
         type       = RPC_DT_INT64;
         int64Value = var;
     }
 
-    explicit RPC_ARGUMENT(PRO_UINT64 var)
+    explicit RPC_ARGUMENT(uint64_t var)
     {
         Reset();
         type        = RPC_DT_UINT64;
@@ -186,7 +186,7 @@ struct RPC_ARGUMENT
         type = RPC_DT_BOOL8ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             bool8Values   = vars;
         }
     }
@@ -200,8 +200,12 @@ struct RPC_ARGUMENT
         type = RPC_DT_INT8ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             int8Values    = vars;
+        }
+        else
+        {
+            int8Values    = "";
         }
     }
 
@@ -214,91 +218,91 @@ struct RPC_ARGUMENT
         type = RPC_DT_UINT8ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             uint8Values   = vars;
         }
     }
 
     RPC_ARGUMENT(
-        const PRO_INT16* vars,
-        size_t           count
+        const int16_t* vars,
+        size_t         count
         )
     {
         Reset();
         type = RPC_DT_INT16ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             int16Values   = vars;
         }
     }
 
     RPC_ARGUMENT(
-        const PRO_UINT16* vars,
-        size_t            count
+        const uint16_t* vars,
+        size_t          count
         )
     {
         Reset();
         type = RPC_DT_UINT16ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             uint16Values  = vars;
         }
     }
 
     RPC_ARGUMENT(
-        const PRO_INT32* vars,
-        size_t           count
+        const int32_t* vars,
+        size_t         count
         )
     {
         Reset();
         type = RPC_DT_INT32ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             int32Values   = vars;
         }
     }
 
     RPC_ARGUMENT(
-        const PRO_UINT32* vars,
-        size_t            count
+        const uint32_t* vars,
+        size_t          count
         )
     {
         Reset();
         type = RPC_DT_UINT32ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             uint32Values  = vars;
         }
     }
 
     RPC_ARGUMENT(
-        const PRO_INT64* vars,
-        size_t           count
+        const int64_t* vars,
+        size_t         count
         )
     {
         Reset();
         type = RPC_DT_INT64ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             int64Values   = vars;
         }
     }
 
     RPC_ARGUMENT(
-        const PRO_UINT64* vars,
-        size_t            count
+        const uint64_t* vars,
+        size_t          count
         )
     {
         Reset();
         type = RPC_DT_UINT64ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             uint64Values  = vars;
         }
     }
@@ -312,7 +316,7 @@ struct RPC_ARGUMENT
         type = RPC_DT_FLOAT32ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             float32Values = vars;
         }
     }
@@ -326,20 +330,10 @@ struct RPC_ARGUMENT
         type = RPC_DT_FLOAT64ARRAY;
         if (vars != NULL && count > 0)
         {
-            countForArray = (PRO_UINT32)count;
+            countForArray = (uint32_t)count;
             float64Values = vars;
         }
     }
-
-    /*
-     * desabled!!!
-     */
-    RPC_ARGUMENT(long);
-    RPC_ARGUMENT(unsigned long);
-    RPC_ARGUMENT(const long*, size_t);
-    RPC_ARGUMENT(const unsigned long*, size_t);
-    RPC_ARGUMENT(void*);
-    RPC_ARGUMENT(void*, size_t);
 
     void Reset()
     {
@@ -358,29 +352,29 @@ struct RPC_ARGUMENT
     bool                     bigEndian_r;
     RPC_DATA_TYPE            type;
     char                     reserved[2];
-    PRO_UINT32               countForArray;
+    uint32_t                 countForArray;
     union
     {
         bool                 bool8Value;
         char                 int8Value;
         unsigned char        uint8Value;
-        PRO_INT16            int16Value;
-        PRO_UINT16           uint16Value;
-        PRO_INT32            int32Value;
-        PRO_UINT32           uint32Value;
-        PRO_INT64            int64Value;
-        PRO_UINT64           uint64Value;
+        int16_t              int16Value;
+        uint16_t             uint16Value;
+        int32_t              int32Value;
+        uint32_t             uint32Value;
+        int64_t              int64Value;
+        uint64_t             uint64Value;
         float                float32Value;
         double               float64Value;
         const bool*          bool8Values;
         const char*          int8Values;
         const unsigned char* uint8Values;
-        const PRO_INT16*     int16Values;
-        const PRO_UINT16*    uint16Values;
-        const PRO_INT32*     int32Values;
-        const PRO_UINT32*    uint32Values;
-        const PRO_INT64*     int64Values;
-        const PRO_UINT64*    uint64Values;
+        const int16_t*       int16Values;
+        const uint16_t*      uint16Values;
+        const int32_t*       int32Values;
+        const uint32_t*      uint32Values;
+        const int64_t*       int64Values;
+        const uint64_t*      uint64Values;
         const float*         float32Values;
         const double*        float64Values;
     };

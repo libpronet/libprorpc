@@ -30,7 +30,6 @@
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
-#include <cassert>
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -39,7 +38,7 @@ static const unsigned char C2S_CID = 1;
 static const unsigned char RPC_CID = 2;
 static const PRO_UINT16    RPC_IID = 1;
 
-typedef void (CRpcServer::* ACTION)(PRO_INT64*);
+typedef void (CRpcServer::* ACTION)(int64_t*);
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -76,7 +75,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
         else
         {
         }
-    } /* end of for (...) */
+    } /* end of for () */
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -176,11 +175,7 @@ CRpcServer::Init(IRpcServerObserver* observer,
 
 EXIT:
 
-    if (taskPool != NULL)
-    {
-        taskPool->Stop();
-        delete taskPool;
-    }
+    delete taskPool;
 
     CMsgServer::Fini();
 
@@ -208,7 +203,6 @@ CRpcServer::Fini()
         m_observer = NULL;
     }
 
-    taskPool->Stop();
     delete taskPool;
     observer->Release();
 
@@ -426,8 +420,8 @@ CRpcServer::SendMsgToClients(const void*       buf,
             return (false);
         }
 
-        ret = m_msgServer->SendMsg(buf, size, charset,
-            &dstUsers[0], (unsigned char)dstUsers.size());
+        ret = m_msgServer->SendMsg(
+            buf, size, charset, &dstUsers[0], (unsigned char)dstUsers.size());
     }
 
     return (ret);
@@ -461,9 +455,9 @@ CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
                         const RTP_MSG_USER* c2sUser, /* = NULL */
                         const char          hash[32],
                         const char          nonce[32],
-                        PRO_UINT64*         userId,
-                        PRO_UINT16*         instId,
-                        PRO_INT64*          appData,
+                        uint64_t*           userId,
+                        uint16_t*           instId,
+                        int64_t*            appData,
                         bool*               isC2s)
 {
     if (!CMsgServer::OnCheckUser(msgServer, user, userPublicIp,
@@ -493,7 +487,7 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
                      const RTP_MSG_USER* user,
                      const char*         userPublicIp,
                      const RTP_MSG_USER* c2sUser, /* = NULL */
-                     PRO_INT64           appData)
+                     int64_t             appData)
 {
     assert(msgServer != NULL);
     assert(user != NULL);
@@ -586,7 +580,7 @@ void
 CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
                       const void*         buf,
                       unsigned long       size,
-                      PRO_UINT16          charset,
+                      uint16_t            charset,
                       const RTP_MSG_USER* srcUser)
 {
     assert(msgServer != NULL);
@@ -711,26 +705,25 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
 
         IProFunctorCommand* const command =
             CProFunctorCommand_cpp<CRpcServer, ACTION>::CreateInstance(
-            *this,
-            &CRpcServer::AsyncRecvRpc,
-            (PRO_INT64)request,
-            (PRO_INT64)ProGetTickCount64() /* arrival time */
-            );
+                *this,
+                &CRpcServer::AsyncRecvRpc,
+                (int64_t)request,
+                (int64_t)ProGetTickCount64() /* arrival time */
+                );
         m_taskPool->Put(srcClientId, command);
     }
 }
 
 void
-CRpcServer::AsyncRecvRpc(PRO_INT64* args)
+CRpcServer::AsyncRecvRpc(int64_t* args)
 {
     CRpcPacket* const request     = (CRpcPacket*)args[0];
-    const PRO_INT64   arrivalTick =              args[1];
+    const int64_t     arrivalTick =              args[1];
 
     /*
      * check timeout
      */
-    if (ProGetTickCount64() >=
-        arrivalTick + (PRO_INT64)request->GetTimeout() * 1000)
+    if (ProGetTickCount64() >= arrivalTick + (int64_t)request->GetTimeout() * 1000)
     {
         request->Release();
 
@@ -813,7 +806,6 @@ CRpcServer::SendErrorCode(PRO_UINT64     clientId,
 
     const RTP_MSG_USER user(RPC_CID, clientId, RPC_IID);
 
-    m_msgServer->SendMsg(
-        result->GetTotalBuffer(), result->GetTotalSize(), 0, &user, 1);
+    m_msgServer->SendMsg(result->GetTotalBuffer(), result->GetTotalSize(), 0, &user, 1);
     result->Release();
 }

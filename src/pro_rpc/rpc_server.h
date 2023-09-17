@@ -118,9 +118,9 @@ private:
         const RTP_MSG_USER* c2sUser, /* = NULL */
         const char          hash[32],
         const char          nonce[32],
-        PRO_UINT64*         userId,
-        PRO_UINT16*         instId,
-        PRO_INT64*          appData,
+        uint64_t*           userId,
+        uint16_t*           instId,
+        int64_t*            appData,
         bool*               isC2s
         );
 
@@ -129,7 +129,7 @@ private:
         const RTP_MSG_USER* user,
         const char*         userPublicIp,
         const RTP_MSG_USER* c2sUser, /* = NULL */
-        PRO_INT64           appData
+        int64_t             appData
         );
 
     virtual void OnCloseUser(
@@ -143,7 +143,7 @@ private:
         IRtpMsgServer*      msgServer,
         const void*         buf,
         unsigned long       size,
-        PRO_UINT16          charset,
+        uint16_t            charset,
         const RTP_MSG_USER* srcUser
         );
 
@@ -169,7 +169,7 @@ private:
         RPC_ERROR_CODE rpcCode
         );
 
-    void AsyncRecvRpc(PRO_INT64* args);
+    void AsyncRecvRpc(int64_t* args);
 
 private:
 

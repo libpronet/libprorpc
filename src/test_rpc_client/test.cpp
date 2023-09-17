@@ -26,7 +26,6 @@
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
 #include "../pro_rpc/pro_rpc.h"
-#include <cassert>
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -235,18 +234,18 @@ CTest::GetServerAddr(char serverIp[64]) const
 void
 CTest::Test()
 {
-    const PRO_INT64 tick = ProGetTickCount64();
+    const int64_t tick = ProGetTickCount64();
 
     Test1(tick);
 
-    const PRO_INT32 a    = 0;
-    const PRO_INT32 b    = 1;
-    const PRO_INT32 c[2] = { 2, 3 };
+    const int32_t a    = 0;
+    const int32_t b    = 1;
+    const int32_t c[2] = { 2, 3 };
     Test2(a, b, c, tick);
 }
 
 void
-CTest::Test1(PRO_INT64 tick)
+CTest::Test1(int64_t tick)
 {
     {
         CProThreadMutexGuard mon(m_lock);
@@ -258,8 +257,7 @@ CTest::Test1(PRO_INT64 tick)
 
         const RPC_ARGUMENT arg(tick);
 
-        IRpcPacket* const request =
-            CreateRpcRequest(RPC_FUNCTION_ID1, &arg, 1);
+        IRpcPacket* const request = CreateRpcRequest(RPC_FUNCTION_ID1, &arg, 1);
         if (request == NULL)
         {
             return;
@@ -271,10 +269,10 @@ CTest::Test1(PRO_INT64 tick)
 }
 
 void
-CTest::Test2(PRO_INT32       a,
-             PRO_INT32       b,
-             const PRO_INT32 c[2],
-             PRO_INT64       tick)
+CTest::Test2(int32_t       a,
+             int32_t       b,
+             const int32_t c[2],
+             int64_t       tick)
 {
     {
         CProThreadMutexGuard mon(m_lock);
@@ -408,23 +406,23 @@ CTest::Test1_ret(IRpcClient* client,
     RPC_ARGUMENT retnArgs[2];
     result->GetArguments(retnArgs, sizeof(retnArgs) / sizeof(RPC_ARGUMENT));
 
-    const bool      arg_ret  = retnArgs[0].bool8Value;
-    const PRO_INT64 arg_tick = retnArgs[1].int64Value;
+    const bool    arg_ret  = retnArgs[0].bool8Value;
+    const int64_t arg_tick = retnArgs[1].int64Value;
 
-    static PRO_INT64 s_tick = ProGetTickCount64();
+    static int64_t s_tick = ProGetTickCount64();
 
-    const PRO_INT64 tick = ProGetTickCount64();
+    const int64_t tick = ProGetTickCount64();
     if (tick - s_tick >= 1000)
     {{{
         s_tick = tick;
 
         printf(
             "\n"
-            " CTest::Test1_ret(...), ret : %d, requestId : " PRO_PRT64U ","
+            " CTest::Test1_ret(), ret : %d, requestId : %llu,"
             " TPS : %.1f, RTT' : %d \n"
             ,
             (int)arg_ret,
-            result->GetRequestId(),
+            (unsigned long long)result->GetRequestId(),
             tps,
             (int)(tick - arg_tick)
             );
@@ -460,23 +458,23 @@ CTest::Test2_ret(IRpcClient* client,
     RPC_ARGUMENT retnArgs[2];
     result->GetArguments(retnArgs, sizeof(retnArgs) / sizeof(RPC_ARGUMENT));
 
-    const PRO_INT32 arg_ret  = retnArgs[0].int32Value;
-    const PRO_INT64 arg_tick = retnArgs[1].int64Value;
+    const int32_t arg_ret  = retnArgs[0].int32Value;
+    const int64_t arg_tick = retnArgs[1].int64Value;
 
-    static PRO_INT64 s_tick = ProGetTickCount64();
+    static int64_t s_tick = ProGetTickCount64();
 
-    const PRO_INT64 tick = ProGetTickCount64();
+    const int64_t tick = ProGetTickCount64();
     if (tick - s_tick >= 1000)
     {{{
         s_tick = tick;
 
         printf(
             "\n"
-            " CTest::Test2_ret(...), ret : %d, requestId : " PRO_PRT64U ","
+            " CTest::Test2_ret(), ret : %d, requestId : %llu,"
             " TPS : %.1f, RTT' : %d \n"
             ,
             (int)arg_ret,
-            result->GetRequestId(),
+            (unsigned long long)result->GetRequestId(),
             tps,
             (int)(tick - arg_tick)
             );

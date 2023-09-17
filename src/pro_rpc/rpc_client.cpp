@@ -31,7 +31,6 @@
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
-#include <cassert>
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -75,7 +74,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
         else
         {
         }
-    } /* end of for (...) */
+    } /* end of for () */
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -439,8 +438,8 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
             return (RPCE_MISMATCHED_PARAMETER);
         }
 
-        if (!m_msgClient->SendMsg(request->GetTotalBuffer(),
-            request->GetTotalSize(), 0, &RPC_ROOT_ID, 1))
+        if (!m_msgClient->SendMsg(
+            request->GetTotalBuffer(), request->GetTotalSize(), 0, &RPC_ROOT_ID, 1))
         {
             return (RPCE_NETWORK_BUSY);
         }
@@ -537,8 +536,8 @@ CRpcClient::SendMsgToClients(const void*       buf,
             return (false);
         }
 
-        ret = m_msgClient->SendMsg(buf, size, charset,
-            &dstUsers[0], (unsigned char)dstUsers.size());
+        ret = m_msgClient->SendMsg(
+            buf, size, charset, &dstUsers[0], (unsigned char)dstUsers.size());
     }
 
     return (ret);
@@ -642,17 +641,17 @@ CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
         char suiteName[64] = "";
         msgClient->GetSslSuite(suiteName);
 
-        CProStlString timeString = "";
+        CProStlString timeString;
         ProGetLocalTimeString(timeString);
 
         printf(
             "\n"
             "%s \n"
-            " CRpcClient::OnOkMsg(id : " PRO_PRT64U ", publicIp : %s,"
+            " CRpcClient::OnOkMsg(id : %llu, publicIp : %s,"
             " sslSuite : %s, server : %s:%u, mmType : %u) \n"
             ,
             timeString.c_str(),
-            clientId,
+            (unsigned long long)clientId,
             myPublicIp,
             suiteName,
             m_msgConfigInfo.msgc_server_ip.c_str(),
@@ -916,18 +915,18 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
 
     if (0)
     {{{
-        CProStlString timeString = "";
+        CProStlString timeString;
         ProGetLocalTimeString(timeString);
 
         printf(
             "\n"
             "%s \n"
-            " CRpcClient::OnCloseMsg(id : " PRO_PRT64U ","
+            " CRpcClient::OnCloseMsg(id : %llu,"
             " errorCode : [%d, %d], tcpConnected : %d, server : %s:%u,"
             " mmType : %u) \n"
             ,
             timeString.c_str(),
-            clientId,
+            (unsigned long long)clientId,
             (int)errorCode,
             (int)sslCode,
             (int)tcpConnected,
@@ -960,9 +959,9 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
 }
 
 void
-CRpcClient::OnTimer(void*      factory,
-                    PRO_UINT64 timerId,
-                    PRO_INT64  userData)
+CRpcClient::OnTimer(void*    factory,
+                    uint64_t timerId,
+                    int64_t  userData)
 {
     assert(factory != NULL);
     assert(timerId > 0);

@@ -23,6 +23,7 @@
 #include "pronet/pro_ref_count.h"
 #include "pronet/pro_stat.h"
 #include "pronet/pro_thread_mutex.h"
+#include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
 #include "../pro_rpc/pro_rpc.h"
@@ -97,13 +98,13 @@ private:
 
     static void RegisterFunctions(IRpcClient* client);
 
-    void Test1(PRO_INT64 tick);
+    void Test1(int64_t tick);
 
     void Test2(
-        PRO_INT32       a,
-        PRO_INT32       b,
-        const PRO_INT32 c[2],
-        PRO_INT64       tick
+        int32_t       a,
+        int32_t       b,
+        const int32_t c[2],
+        int64_t       tick
         );
 
     void Test1_ret(

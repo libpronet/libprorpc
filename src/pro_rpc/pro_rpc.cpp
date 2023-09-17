@@ -24,7 +24,6 @@
 #include "pronet/pro_z.h"
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
-#include <cassert>
 
 #if defined(__cplusplus)
 extern "C" {

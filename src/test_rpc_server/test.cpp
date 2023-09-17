@@ -24,7 +24,6 @@
 #include "pronet/rtp_base.h"
 #include "pronet/rtp_msg.h"
 #include "../pro_rpc/pro_rpc.h"
-#include <cassert>
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -267,7 +266,7 @@ CTest::Test1_req(IRpcServer* server,
     RPC_ARGUMENT callArg;
     request->GetArgument(0, &callArg);
 
-    const PRO_INT64 arg_tick = callArg.int64Value;
+    const int64_t arg_tick = callArg.int64Value;
 
     const RPC_ARGUMENT retnArg0(true);
     const RPC_ARGUMENT retnArg1(arg_tick);
@@ -303,12 +302,12 @@ CTest::Test2_req(IRpcServer* server,
     RPC_ARGUMENT callArgs[4];
     request->GetArguments(callArgs, sizeof(callArgs) / sizeof(RPC_ARGUMENT));
 
-    const PRO_INT32        arg_a    = callArgs[0].int32Value;
-    const PRO_INT32        arg_b    = callArgs[1].int32Value;
-    const PRO_INT32* const arg_c    = callArgs[2].int32Values;
-    const PRO_INT64        arg_tick = callArgs[3].int64Value;
+    const int32_t        arg_a    = callArgs[0].int32Value;
+    const int32_t        arg_b    = callArgs[1].int32Value;
+    const int32_t* const arg_c    = callArgs[2].int32Values;
+    const int64_t        arg_tick = callArgs[3].int64Value;
 
-    PRO_INT32 sum = arg_a + arg_b;
+    int32_t sum = arg_a + arg_b;
     if (arg_c != NULL)
     {
         for (int i = 0; i < (int)callArgs[2].countForArray; ++i)
