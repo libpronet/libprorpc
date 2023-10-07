@@ -55,7 +55,7 @@ private:
 
     virtual void OnLogon(
         IRpcServer* server,
-        PRO_UINT64  clientId,
+        uint64_t    clientId,
         const char* clientPublicIp
         )
     {
@@ -63,9 +63,9 @@ private:
 
     virtual void OnLogoff(
         IRpcServer* server,
-        PRO_UINT64  clientId,
-        long        errorCode,
-        long        sslCode
+        uint64_t    clientId,
+        int         errorCode,
+        int         sslCode
         )
     {
     }
@@ -76,11 +76,11 @@ private:
         );
 
     virtual void OnRecvMsg(
-        IRpcServer*   server,
-        const void*   buf,
-        unsigned long size,
-        PRO_UINT16    charset,
-        PRO_UINT64    srcClientId
+        IRpcServer* server,
+        const void* buf,
+        size_t      size,
+        uint16_t    charset,
+        uint64_t    srcClientId
         )
     {
     }

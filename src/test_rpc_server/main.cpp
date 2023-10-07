@@ -43,13 +43,13 @@ int main(int argc, char* argv[])
         " test_rpc_server 2 \n"
         );
 
-    unsigned long thread_count = DEFAULT_THREAD_COUNT;
-    IProReactor*  reactor      = NULL;
-    CTest*        tester       = NULL;
+    unsigned int thread_count = DEFAULT_THREAD_COUNT;
+    IProReactor* reactor      = NULL;
+    CTest*       tester       = NULL;
 
     if (argc >= 2)
     {
-        const int value = atoi(argv[1]);
+        int value = atoi(argv[1]);
         if (value > 0 && value <= 100)
         {
             thread_count = value;
@@ -97,5 +97,5 @@ EXIT:
     ProDeleteReactor(reactor);
     ProSleep(3000);
 
-    return (0);
+    return 0;
 }

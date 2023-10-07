@@ -39,17 +39,17 @@ public:
      * for making request
      */
     static CRpcPacket* CreateInstance(
-        PRO_UINT32 functionId,
-        bool       convertByteOrder /* = false */
+        uint32_t functionId,
+        bool     convertByteOrder /* = false */
         );
 
     /*
      * for making result
      */
     static CRpcPacket* CreateInstance(
-        PRO_UINT64 requestId,
-        PRO_UINT32 functionId,
-        bool       convertByteOrder /* = false */
+        uint64_t requestId,
+        uint32_t functionId,
+        bool     convertByteOrder /* = false */
         );
 
     /*
@@ -66,17 +66,17 @@ public:
 
     virtual unsigned long Release();
 
-    void SetClientId(PRO_UINT64 clientId);
+    void SetClientId(uint64_t clientId);
 
-    virtual PRO_UINT64 GetClientId() const;
+    virtual uint64_t GetClientId() const;
 
-    void SetRequestId(PRO_UINT64 requestId);
+    void SetRequestId(uint64_t requestId);
 
-    virtual PRO_UINT64 GetRequestId() const;
+    virtual uint64_t GetRequestId() const;
 
-    void SetFunctionId(PRO_UINT32 functionId);
+    void SetFunctionId(uint32_t functionId);
 
-    virtual PRO_UINT32 GetFunctionId() const;
+    virtual uint32_t GetFunctionId() const;
 
     void SetRpcCode(RPC_ERROR_CODE rpcCode);
 
@@ -86,14 +86,14 @@ public:
 
     virtual bool GetNoreply() const;
 
-    void SetTimeout(PRO_UINT32 timeoutInSeconds);
+    void SetTimeout(uint32_t timeoutInSeconds);
 
-    PRO_UINT32 GetTimeout() const;
+    uint32_t GetTimeout() const;
 
-    virtual unsigned long GetArgumentCount() const;
+    virtual size_t GetArgumentCount() const;
 
     virtual void GetArgument(
-        unsigned long index,
+        unsigned int  index,
         RPC_ARGUMENT* arg
         ) const;
 
@@ -106,15 +106,15 @@ public:
 
     virtual const void* GetTotalBuffer() const;
 
-    virtual unsigned long GetTotalSize() const;
+    virtual size_t GetTotalSize() const;
 
-    virtual void SetMagic1(PRO_INT64 magic1);
+    virtual void SetMagic1(int64_t magic1);
 
-    virtual PRO_INT64 GetMagic1() const;
+    virtual int64_t GetMagic1() const;
 
-    virtual void SetMagic2(PRO_INT64 magic2);
+    virtual void SetMagic2(int64_t magic2);
 
-    virtual PRO_INT64 GetMagic2() const;
+    virtual int64_t GetMagic2() const;
 
     /*
      * [[[[ push arguments
@@ -136,9 +136,9 @@ public:
 private:
 
     CRpcPacket(
-        PRO_UINT64 requestId,
-        PRO_UINT32 functionId,
-        bool       processByteOrder /* = false */
+        uint64_t requestId,
+        uint32_t functionId,
+        bool     processByteOrder /* = false */
         );
 
     virtual ~CRpcPacket()
@@ -153,9 +153,9 @@ private:
 private:
 
     const bool                  m_convertByteOrder;
-    PRO_UINT64                  m_clientId;
-    PRO_INT64                   m_magic1;
-    PRO_INT64                   m_magic2;
+    uint64_t                    m_clientId;
+    int64_t                     m_magic1;
+    int64_t                     m_magic2;
 
     RPC_HDR                     m_hdr;
     CProStlVector<RPC_ARGUMENT> m_args;

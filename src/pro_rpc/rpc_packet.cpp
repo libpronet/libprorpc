@@ -30,19 +30,19 @@
 ////
 
 static const char      g_s_signature[8]  = "***PRPC";
-static PRO_UINT64      g_s_nextRequestId = 1;
+static uint64_t        g_s_nextRequestId = 1;
 static CProThreadMutex g_s_lock;
 
 /////////////////////////////////////////////////////////////////////////////
 ////
 
 static
-PRO_UINT64
+uint64_t
 MakeRequestId_i()
 {
     g_s_lock.Lock();
 
-    const PRO_UINT64 requestId = g_s_nextRequestId;
+    uint64_t requestId = g_s_nextRequestId;
     ++g_s_nextRequestId;
     if (g_s_nextRequestId == 0)
     {
@@ -51,7 +51,7 @@ MakeRequestId_i()
 
     g_s_lock.Unlock();
 
-    return (requestId);
+    return requestId;
 }
 
 static
@@ -175,10 +175,10 @@ Reverse64s_i(uint64_t* vars,
 }
 
 static
-unsigned long
+size_t
 GetNaluSize_i(const RPC_ARGUMENT& arg)
 {
-    unsigned long size = sizeof(RPC_ARGUMENT);
+    size_t size = sizeof(RPC_ARGUMENT);
 
     switch (arg.type)
     {
@@ -243,7 +243,7 @@ GetNaluSize_i(const RPC_ARGUMENT& arg)
         }
     } /* end of switch () */
 
-    return (size);
+    return size;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -252,43 +252,35 @@ GetNaluSize_i(const RPC_ARGUMENT& arg)
 CRpcPacket*
 CRpcPacket::CreateInstance()
 {
-    CRpcPacket* const packet = new CRpcPacket(0, 0, false);
-
-    return (packet);
+    return new CRpcPacket(0, 0, false);
 }
 
 CRpcPacket*
-CRpcPacket::CreateInstance(PRO_UINT32 functionId,
-                           bool       convertByteOrder) /* = false */
+CRpcPacket::CreateInstance(uint32_t functionId,
+                           bool     convertByteOrder) /* = false */
 {
     assert(functionId > 0);
     if (functionId == 0)
     {
-        return (NULL);
+        return NULL;
     }
 
-    CRpcPacket* const packet =
-        new CRpcPacket(MakeRequestId_i(), functionId, convertByteOrder);
-
-    return (packet);
+    return new CRpcPacket(MakeRequestId_i(), functionId, convertByteOrder);
 }
 
 CRpcPacket*
-CRpcPacket::CreateInstance(PRO_UINT64 requestId,
-                           PRO_UINT32 functionId,
-                           bool       convertByteOrder) /* = false */
+CRpcPacket::CreateInstance(uint64_t requestId,
+                           uint32_t functionId,
+                           bool     convertByteOrder) /* = false */
 {
     assert(requestId > 0);
     assert(functionId > 0);
     if (requestId == 0 || functionId == 0)
     {
-        return (NULL);
+        return NULL;
     }
 
-    CRpcPacket* const packet =
-        new CRpcPacket(requestId, functionId, convertByteOrder);
-
-    return (packet);
+    return new CRpcPacket(requestId, functionId, convertByteOrder);
 }
 
 /*
@@ -307,15 +299,15 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
     assert(size > 0);
     if (buffer == NULL || size == 0)
     {
-        return (false);
+        return false;
     }
 
     bool ret = false;
 
     do
     {
-        unsigned long needSize = sizeof(RPC_HDR);
-        const char*   now      = (char*)buffer;
+        size_t      needSize = sizeof(RPC_HDR);
+        const char* now      = (char*)buffer;
 
         if (size < needSize)
         {
@@ -386,7 +378,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     }
                     else
                     {
-                        const unsigned long bodySize = (1 * arg.countForArray + 3) / 4 * 4;
+                        size_t bodySize = (1 * arg.countForArray + 3) / 4 * 4;
                         needSize += bodySize;
                         if (size < needSize)
                         {
@@ -411,7 +403,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     }
                     else
                     {
-                        const unsigned long bodySize = (2 * arg.countForArray + 3) / 4 * 4;
+                        size_t bodySize = (2 * arg.countForArray + 3) / 4 * 4;
                         needSize += bodySize;
                         if (size < needSize)
                         {
@@ -437,7 +429,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     }
                     else
                     {
-                        const unsigned long bodySize = 4 * arg.countForArray;
+                        size_t bodySize = 4 * arg.countForArray;
                         needSize += bodySize;
                         if (size < needSize)
                         {
@@ -463,7 +455,7 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
                     }
                     else
                     {
-                        const unsigned long bodySize = 8 * arg.countForArray;
+                        size_t bodySize = 8 * arg.countForArray;
                         needSize += bodySize;
                         if (size < needSize)
                         {
@@ -494,12 +486,12 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
         args.clear();
     }
 
-    return (ret);
+    return ret;
 }
 
-CRpcPacket::CRpcPacket(PRO_UINT64 requestId,
-                       PRO_UINT32 functionId,
-                       bool       convertByteOrder) /* = false */
+CRpcPacket::CRpcPacket(uint64_t requestId,
+                       uint32_t functionId,
+                       bool     convertByteOrder) /* = false */
 : m_convertByteOrder(convertByteOrder)
 {
     m_clientId             = 0;
@@ -511,71 +503,67 @@ CRpcPacket::CRpcPacket(PRO_UINT64 requestId,
     m_hdr.functionId       = functionId;
     m_hdr.rpcCode          = RPCE_OK;
     m_hdr.noreply          = false;
-    m_hdr.timeoutInSeconds = (PRO_UINT32)-1;
+    m_hdr.timeoutInSeconds = (uint32_t)-1;
 }
 
 unsigned long
 CRpcPacket::AddRef()
 {
-    const unsigned long refCount = CProRefCount::AddRef();
-
-    return (refCount);
+    return CProRefCount::AddRef();
 }
 
 unsigned long
 CRpcPacket::Release()
 {
-    const unsigned long refCount = CProRefCount::Release();
-
-    return (refCount);
+    return CProRefCount::Release();
 }
 
 void
-CRpcPacket::SetClientId(PRO_UINT64 clientId)
+CRpcPacket::SetClientId(uint64_t clientId)
 {
     m_clientId = clientId;
 }
 
-PRO_UINT64
+uint64_t
 CRpcPacket::GetClientId() const
 {
-    return (m_clientId);
+    return m_clientId;
 }
 
 void
-CRpcPacket::SetRequestId(PRO_UINT64 requestId)
+CRpcPacket::SetRequestId(uint64_t requestId)
 {
     m_hdr.requestId = requestId;
 
     if (m_buffer.Size() >= sizeof(RPC_HDR))
     {
-        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        RPC_HDR* hdr = (RPC_HDR*)m_buffer.Data();
         hdr->requestId = pbsd_hton64(requestId);
     }
 }
 
-PRO_UINT64
+uint64_t
 CRpcPacket::GetRequestId() const
 {
-    return (m_hdr.requestId);
+    return m_hdr.requestId;
 }
 
 void
-CRpcPacket::SetFunctionId(PRO_UINT32 functionId)
+CRpcPacket::SetFunctionId(uint32_t functionId)
 {
     m_hdr.functionId = functionId;
 
     if (m_buffer.Size() >= sizeof(RPC_HDR))
     {
-        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        RPC_HDR* hdr = (RPC_HDR*)m_buffer.Data();
         hdr->functionId = pbsd_hton32(functionId);
     }
 }
 
-PRO_UINT32
+uint32_t
 CRpcPacket::GetFunctionId() const
 {
-    return (m_hdr.functionId);
+    return m_hdr.functionId;
 }
 
 void
@@ -585,7 +573,7 @@ CRpcPacket::SetRpcCode(RPC_ERROR_CODE rpcCode)
 
     if (m_buffer.Size() >= sizeof(RPC_HDR))
     {
-        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        RPC_HDR* hdr = (RPC_HDR*)m_buffer.Data();
         hdr->rpcCode = pbsd_hton32(rpcCode);
     }
 }
@@ -593,7 +581,7 @@ CRpcPacket::SetRpcCode(RPC_ERROR_CODE rpcCode)
 RPC_ERROR_CODE
 CRpcPacket::GetRpcCode() const
 {
-    return (m_hdr.rpcCode);
+    return m_hdr.rpcCode;
 }
 
 void
@@ -603,7 +591,7 @@ CRpcPacket::SetNoreply(bool noreply)
 
     if (m_buffer.Size() >= sizeof(RPC_HDR))
     {
-        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        RPC_HDR* hdr = (RPC_HDR*)m_buffer.Data();
         hdr->noreply = noreply;
     }
 }
@@ -611,35 +599,35 @@ CRpcPacket::SetNoreply(bool noreply)
 bool
 CRpcPacket::GetNoreply() const
 {
-    return (m_hdr.noreply);
+    return m_hdr.noreply;
 }
 
 void
-CRpcPacket::SetTimeout(PRO_UINT32 timeoutInSeconds)
+CRpcPacket::SetTimeout(uint32_t timeoutInSeconds)
 {
     m_hdr.timeoutInSeconds = timeoutInSeconds;
 
     if (m_buffer.Size() >= sizeof(RPC_HDR))
     {
-        RPC_HDR* const hdr = (RPC_HDR*)m_buffer.Data();
+        RPC_HDR* hdr = (RPC_HDR*)m_buffer.Data();
         hdr->timeoutInSeconds = pbsd_hton32(timeoutInSeconds);
     }
 }
 
-PRO_UINT32
+uint32_t
 CRpcPacket::GetTimeout() const
 {
-    return (m_hdr.timeoutInSeconds);
+    return m_hdr.timeoutInSeconds;
 }
 
-unsigned long
+size_t
 CRpcPacket::GetArgumentCount() const
 {
-    return ((unsigned long)m_args.size());
+    return m_args.size();
 }
 
 void
-CRpcPacket::GetArgument(unsigned long index,
+CRpcPacket::GetArgument(unsigned int  index,
                         RPC_ARGUMENT* arg) const
 {
     assert(arg != NULL);
@@ -687,43 +675,43 @@ CRpcPacket::GetArguments(RPC_ARGUMENT* args,
 void*
 CRpcPacket::GetTotalBuffer()
 {
-    return (m_buffer.Data());
+    return m_buffer.Data();
 }
 
 const void*
 CRpcPacket::GetTotalBuffer() const
 {
-    return (m_buffer.Data());
+    return m_buffer.Data();
 }
 
-unsigned long
+size_t
 CRpcPacket::GetTotalSize() const
 {
-    return (unsigned long)m_buffer.Size();
+    return m_buffer.Size();
 }
 
 void
-CRpcPacket::SetMagic1(PRO_INT64 magic1)
+CRpcPacket::SetMagic1(int64_t magic1)
 {
     m_magic1 = magic1;
 }
 
-PRO_INT64
+int64_t
 CRpcPacket::GetMagic1() const
 {
-    return (m_magic1);
+    return m_magic1;
 }
 
 void
-CRpcPacket::SetMagic2(PRO_INT64 magic2)
+CRpcPacket::SetMagic2(int64_t magic2)
 {
     m_magic2 = magic2;
 }
 
-PRO_INT64
+int64_t
 CRpcPacket::GetMagic2() const
 {
-    return (m_magic2);
+    return m_magic2;
 }
 
 void
@@ -736,7 +724,7 @@ CRpcPacket::CleanAndBeginPushArgument()
 bool
 CRpcPacket::PushArgument(RPC_ARGUMENT arg)
 {
-    return (PushArgument(arg, m_args));
+    return PushArgument(arg, m_args);
 }
 
 bool
@@ -793,7 +781,7 @@ CRpcPacket::PushArgument(RPC_ARGUMENT                 arg,
         args.push_back(arg);
     }
 
-    return (ret);
+    return ret;
 }
 
 bool
@@ -804,7 +792,7 @@ CRpcPacket::PushArguments(const RPC_ARGUMENT* args,
     assert(count > 0);
     if (args == NULL || count == 0)
     {
-        return (false);
+        return false;
     }
 
     CProStlVector<RPC_ARGUMENT> args2;
@@ -819,36 +807,36 @@ CRpcPacket::PushArguments(const RPC_ARGUMENT* args,
 
     if (args2.size() != count)
     {
-        return (false);
+        return false;
     }
 
     m_args.insert(m_args.end(), args2.begin(), args2.end());
 
-    return (true);
+    return true;
 }
 
 bool
 CRpcPacket::EndPushArgument()
 {
-    char*                        now = NULL;
-    CProStlVector<unsigned long> naluSizes;
+    char*                 now = NULL;
+    CProStlVector<size_t> naluSizes;
 
     {
-        unsigned long totalSize = sizeof(RPC_HDR);
+        size_t totalSize = sizeof(RPC_HDR);
 
-        int       i = 0;
-        const int c = (int)m_args.size();
+        int i = 0;
+        int c = (int)m_args.size();
 
         for (; i < c; ++i)
         {
-            const unsigned long size = GetNaluSize_i(m_args[i]);
+            size_t size = GetNaluSize_i(m_args[i]);
             naluSizes.push_back(size);
             totalSize += size;
         }
 
         if (!m_buffer.Resize(totalSize))
         {
-            return (false);
+            return false;
         }
 
         now = (char*)m_buffer.Data();
@@ -869,13 +857,13 @@ CRpcPacket::EndPushArgument()
     }
 
 #if defined(PRO_WORDS_BIGENDIAN)
-    const bool bigEndian = true;
+    bool bigEndian = true;
 #else
-    const bool bigEndian = false;
+    bool bigEndian = false;
 #endif
 
-    int       i = 0;
-    const int c = (int)m_args.size();
+    int i = 0;
+    int c = (int)m_args.size();
 
     for (; i < c; ++i)
     {
@@ -1031,7 +1019,7 @@ CRpcPacket::EndPushArgument()
         now += naluSizes[i];
     } /* end of for () */
 
-    return (true);
+    return true;
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1072,19 +1060,19 @@ CheckRpcDataType(RPC_DATA_TYPE type)
         }
     }
 
-    return (ret);
+    return ret;
 }
 
 bool
 CmpRpcArgsTypes(const CProStlVector<RPC_ARGUMENT>&  args,
                 const CProStlVector<RPC_DATA_TYPE>& types)
 {
-    const int c1 = (int)args.size();
-    const int c2 = (int)types.size();
+    int c1 = (int)args.size();
+    int c2 = (int)types.size();
 
     if (c1 != c2)
     {
-        return (false);
+        return false;
     }
 
     bool ret = true;
@@ -1098,7 +1086,7 @@ CmpRpcArgsTypes(const CProStlVector<RPC_ARGUMENT>&  args,
         }
     }
 
-    return (ret);
+    return ret;
 }
 
 bool
@@ -1108,15 +1096,15 @@ CmpRpcPacketTypes(const IRpcPacket*                   packet,
     assert(packet != NULL);
     if (packet == NULL)
     {
-        return (false);
+        return false;
     }
 
-    const int c1 = (int)packet->GetArgumentCount();
-    const int c2 = (int)types.size();
+    int c1 = (int)packet->GetArgumentCount();
+    int c2 = (int)types.size();
 
     if (c1 != c2)
     {
-        return (false);
+        return false;
     }
 
     bool ret = true;
@@ -1133,5 +1121,5 @@ CmpRpcPacketTypes(const IRpcPacket*                   packet,
         }
     }
 
-    return (ret);
+    return ret;
 }

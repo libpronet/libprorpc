@@ -37,9 +37,7 @@
 CTest*
 CTest::CreateInstance()
 {
-    CTest* const tester = new CTest;
-
-    return (tester);
+    return new CTest;
 }
 
 CTest::CTest()
@@ -59,7 +57,7 @@ CTest::Init(IProReactor* reactor)
     assert(reactor != NULL);
     if (reactor == NULL)
     {
-        return (false);
+        return false;
     }
 
     {
@@ -69,13 +67,13 @@ CTest::Init(IProReactor* reactor)
         assert(m_server == NULL);
         if (m_reactor != NULL || m_server != NULL)
         {
-            return (false);
+            return false;
         }
 
         m_server = CreateRpcServer(this, reactor, "rpc_server.cfg", 0, 0);
         if (m_server == NULL)
         {
-            return (false);
+            return false;
         }
 
         RegisterFunctions(m_server);
@@ -83,7 +81,7 @@ CTest::Init(IProReactor* reactor)
         m_reactor = reactor;
     }
 
-    return (true);
+    return true;
 }
 
 void
@@ -94,15 +92,14 @@ CTest::RegisterFunctions(IRpcServer* server)
     /*
      * function1
      *
-     * bool
-     * ReturnTrue(PRO_INT64& tick);
+     * bool ReturnTrue(int64_t& tick);
      */
     {
-        const RPC_DATA_TYPE callArgTypes[] =
+        RPC_DATA_TYPE callArgTypes[] =
         {
             RPC_DT_INT64
         };
-        const RPC_DATA_TYPE retnArgTypes[] =
+        RPC_DATA_TYPE retnArgTypes[] =
         {
             RPC_DT_BOOL8,
             RPC_DT_INT64
@@ -119,18 +116,17 @@ CTest::RegisterFunctions(IRpcServer* server)
     /*
      * function2
      *
-     * PRO_INT32
-     * Sum(PRO_INT32 a, PRO_INT32 b, const PRO_INT32 c[2], PRO_INT64& tick);
+     * int32_t Sum(int32_t a, int32_t b, const int32_t c[2], int64_t& tick);
      */
     {
-        const RPC_DATA_TYPE callArgTypes[] =
+        RPC_DATA_TYPE callArgTypes[] =
         {
             RPC_DT_INT32,
             RPC_DT_INT32,
             RPC_DT_INT32ARRAY,
             RPC_DT_INT64
         };
-        const RPC_DATA_TYPE retnArgTypes[] =
+        RPC_DATA_TYPE retnArgTypes[] =
         {
             RPC_DT_INT32,
             RPC_DT_INT64
@@ -169,17 +165,13 @@ CTest::Fini()
 unsigned long
 CTest::AddRef()
 {
-    const unsigned long refCount = CProRefCount::AddRef();
-
-    return (refCount);
+    return CProRefCount::AddRef();
 }
 
 unsigned long
 CTest::Release()
 {
-    const unsigned long refCount = CProRefCount::Release();
-
-    return (refCount);
+    return CProRefCount::Release();
 }
 
 RTP_MM_TYPE
@@ -196,7 +188,7 @@ CTest::GetMmType() const
         }
     }
 
-    return (mmType);
+    return mmType;
 }
 
 unsigned short
@@ -213,7 +205,7 @@ CTest::GetServicePort() const
         }
     }
 
-    return (servicePort);
+    return servicePort;
 }
 
 void
@@ -266,16 +258,16 @@ CTest::Test1_req(IRpcServer* server,
     RPC_ARGUMENT callArg;
     request->GetArgument(0, &callArg);
 
-    const int64_t arg_tick = callArg.int64Value;
+    int64_t arg_tick = callArg.int64Value;
 
-    const RPC_ARGUMENT retnArg0(true);
-    const RPC_ARGUMENT retnArg1(arg_tick);
+    RPC_ARGUMENT retnArg0(true);
+    RPC_ARGUMENT retnArg1(arg_tick);
 
     RPC_ARGUMENT retnArgs[2];
     retnArgs[0] = retnArg0;
     retnArgs[1] = retnArg1;
 
-    IRpcPacket* const result = CreateRpcResult(
+    IRpcPacket* result = CreateRpcResult(
         request->GetClientId(),
         request->GetRequestId(),
         request->GetFunctionId(),
@@ -302,10 +294,10 @@ CTest::Test2_req(IRpcServer* server,
     RPC_ARGUMENT callArgs[4];
     request->GetArguments(callArgs, sizeof(callArgs) / sizeof(RPC_ARGUMENT));
 
-    const int32_t        arg_a    = callArgs[0].int32Value;
-    const int32_t        arg_b    = callArgs[1].int32Value;
-    const int32_t* const arg_c    = callArgs[2].int32Values;
-    const int64_t        arg_tick = callArgs[3].int64Value;
+    int32_t        arg_a    = callArgs[0].int32Value;
+    int32_t        arg_b    = callArgs[1].int32Value;
+    const int32_t* arg_c    = callArgs[2].int32Values;
+    int64_t        arg_tick = callArgs[3].int64Value;
 
     int32_t sum = arg_a + arg_b;
     if (arg_c != NULL)
@@ -316,14 +308,14 @@ CTest::Test2_req(IRpcServer* server,
         }
     }
 
-    const RPC_ARGUMENT retnArg0(sum);
-    const RPC_ARGUMENT retnArg1(arg_tick);
+    RPC_ARGUMENT retnArg0(sum);
+    RPC_ARGUMENT retnArg1(arg_tick);
 
     RPC_ARGUMENT retnArgs[2];
     retnArgs[0] = retnArg0;
     retnArgs[1] = retnArg1;
 
-    IRpcPacket* const result = CreateRpcResult(
+    IRpcPacket* result = CreateRpcResult(
         request->GetClientId(),
         request->GetRequestId(),
         request->GetFunctionId(),

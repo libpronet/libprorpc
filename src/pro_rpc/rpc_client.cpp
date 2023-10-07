@@ -37,7 +37,7 @@
 
 static const RTP_MSG_USER  RPC_ROOT_ID(1, 1, 0); /* 1-1 */
 static const unsigned char RPC_CID = 2;
-static const PRO_UINT16    RPC_IID = 1;
+static const uint16_t      RPC_IID = 1;
 
 /////////////////////////////////////////////////////////////////////////////
 ////
@@ -47,8 +47,8 @@ void
 ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
              RPC_CLIENT_CONFIG_INFO&               configInfo)
 {
-    int       i = 0;
-    const int c = (int)configs.size();
+    int i = 0;
+    int c = (int)configs.size();
 
     for (; i < c; ++i)
     {
@@ -57,7 +57,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
 
         if (stricmp(configName.c_str(), "rpcc_pending_calls") == 0)
         {
-            const int value = atoi(configValue.c_str());
+            int value = atoi(configValue.c_str());
             if (value > 0)
             {
                 configInfo.rpcc_pending_calls = value;
@@ -65,7 +65,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
         }
         else if (stricmp(configName.c_str(), "rpcc_rpc_timeout") == 0)
         {
-            const int value = atoi(configValue.c_str());
+            int value = atoi(configValue.c_str());
             if (value > 0 && value <= 3600)
             {
                 configInfo.rpcc_rpc_timeout = value;
@@ -81,16 +81,14 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
 ////
 
 CRpcClient*
-CRpcClient::CreateInstance(PRO_INT64 magic,  /* = 0 */
-                           PRO_INT64 magic2) /* = 0 */
+CRpcClient::CreateInstance(int64_t magic,  /* = 0 */
+                           int64_t magic2) /* = 0 */
 {
-    CRpcClient* const client = new CRpcClient(magic, magic2);
-
-    return (client);
+    return new CRpcClient(magic, magic2);
 }
 
-CRpcClient::CRpcClient(PRO_INT64 magic,  /* = 0 */
-                       PRO_INT64 magic2) /* = 0 */
+CRpcClient::CRpcClient(int64_t magic,  /* = 0 */
+                       int64_t magic2) /* = 0 */
 {
     m_observer = NULL;
     m_packet   = NULL;
@@ -119,10 +117,9 @@ CRpcClient::Init(IRpcClientObserver* observer,
     assert(reactor != NULL);
     assert(configFileName != NULL);
     assert(configFileName[0] != '\0');
-    if (observer == NULL || reactor == NULL || configFileName == NULL ||
-        configFileName[0] == '\0')
+    if (observer == NULL || reactor == NULL || configFileName == NULL || configFileName[0] == '\0')
     {
-        return (false);
+        return false;
     }
 
     char exeRoot[1024] = "";
@@ -143,7 +140,7 @@ CRpcClient::Init(IRpcClientObserver* observer,
     CProStlVector<PRO_CONFIG_ITEM> configs;
     if (!configFile.Read(configs))
     {
-        return (false);
+        return false;
     }
 
     RPC_CLIENT_CONFIG_INFO configInfo;
@@ -159,11 +156,11 @@ CRpcClient::Init(IRpcClientObserver* observer,
         assert(m_packet == NULL);
         if (m_observer != NULL || m_reactor != NULL || m_packet != NULL)
         {
-            return (false);
+            return false;
         }
 
-        if (!CMsgClient::Init(reactor, configFileName, mmType,
-            serverIp, serverPort, user, password, localIp))
+        if (!CMsgClient::Init(reactor, configFileName, mmType, serverIp, serverPort,
+            user, password, localIp))
         {
             goto EXIT;
         }
@@ -180,7 +177,7 @@ CRpcClient::Init(IRpcClientObserver* observer,
         m_packet     = packet;
     }
 
-    return (true);
+    return true;
 
 EXIT:
 
@@ -191,7 +188,7 @@ EXIT:
 
     CMsgClient::Fini();
 
-    return (false);
+    return false;
 }
 
 void
@@ -208,8 +205,8 @@ CRpcClient::Fini()
             return;
         }
 
-        CProStlMap<PRO_UINT64, RPC_HDR2>::iterator       itr = m_timerId2Hdr.begin();
-        CProStlMap<PRO_UINT64, RPC_HDR2>::iterator const end = m_timerId2Hdr.end();
+        auto itr = m_timerId2Hdr.begin();
+        auto end = m_timerId2Hdr.end();
 
         for (; itr != end; ++itr)
         {
@@ -234,17 +231,13 @@ CRpcClient::Fini()
 unsigned long
 CRpcClient::AddRef()
 {
-    const unsigned long refCount = CMsgClient::AddRef();
-
-    return (refCount);
+    return CMsgClient::AddRef();
 }
 
 unsigned long
 CRpcClient::Release()
 {
-    const unsigned long refCount = CMsgClient::Release();
-
-    return (refCount);
+    return CMsgClient::Release();
 }
 
 RTP_MM_TYPE
@@ -258,13 +251,13 @@ CRpcClient::GetMmType() const
         mmType = m_msgConfigInfo.msgc_mm_type;
     }
 
-    return (mmType);
+    return mmType;
 }
 
-PRO_UINT64
+uint64_t
 CRpcClient::GetClientId() const
 {
-    PRO_UINT64 clientId = 0;
+    uint64_t clientId = 0;
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -272,35 +265,35 @@ CRpcClient::GetClientId() const
         clientId = m_clientId;
     }
 
-    return (clientId);
+    return clientId;
 }
 
 const char*
 CRpcClient::GetServerIp(char serverIp[64]) const
 {
-    return (CMsgClient::GetRemoteIp(serverIp));
+    return CMsgClient::GetRemoteIp(serverIp);
 }
 
 unsigned short
 CRpcClient::GetServerPort() const
 {
-    return (CMsgClient::GetRemotePort());
+    return CMsgClient::GetRemotePort();
 }
 
 const char*
 CRpcClient::GetLocalIp(char localIp[64]) const
 {
-    return (CMsgClient::GetLocalIp(localIp));
+    return CMsgClient::GetLocalIp(localIp);
 }
 
 unsigned short
 CRpcClient::GetLocalPort() const
 {
-    return (CMsgClient::GetLocalPort());
+    return CMsgClient::GetLocalPort();
 }
 
 RPC_ERROR_CODE
-CRpcClient::RegisterFunction(PRO_UINT32           functionId,
+CRpcClient::RegisterFunction(uint32_t             functionId,
                              const RPC_DATA_TYPE* callArgTypes, /* = NULL */
                              size_t               callArgCount, /* = 0 */
                              const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
@@ -309,7 +302,7 @@ CRpcClient::RegisterFunction(PRO_UINT32           functionId,
     assert(functionId > 0);
     if (functionId == 0)
     {
-        return (RPCE_INVALID_ARGUMENT);
+        return RPCE_INVALID_ARGUMENT;
     }
 
     if (
@@ -320,7 +313,7 @@ CRpcClient::RegisterFunction(PRO_UINT32           functionId,
     {
         assert(0);
 
-        return (RPCE_INVALID_ARGUMENT);
+        return RPCE_INVALID_ARGUMENT;
     }
 
     for (int i = 0; i < (int)callArgCount; ++i)
@@ -328,7 +321,7 @@ CRpcClient::RegisterFunction(PRO_UINT32           functionId,
         assert(CheckRpcDataType(callArgTypes[i]));
         if (!CheckRpcDataType(callArgTypes[i]))
         {
-            return (RPCE_INVALID_ARGUMENT);
+            return RPCE_INVALID_ARGUMENT;
         }
     }
 
@@ -337,7 +330,7 @@ CRpcClient::RegisterFunction(PRO_UINT32           functionId,
         assert(CheckRpcDataType(retnArgTypes[j]));
         if (!CheckRpcDataType(retnArgTypes[j]))
         {
-            return (RPCE_INVALID_ARGUMENT);
+            return RPCE_INVALID_ARGUMENT;
         }
     }
 
@@ -346,7 +339,7 @@ CRpcClient::RegisterFunction(PRO_UINT32           functionId,
 
         if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
         {
-            return (RPCE_ERROR);
+            return RPCE_ERROR;
         }
 
         RPC_FUNCTION_INFO& info = m_funtionId2Info[functionId]; /* insert */
@@ -364,11 +357,11 @@ CRpcClient::RegisterFunction(PRO_UINT32           functionId,
         }
     }
 
-    return (RPCE_OK);
+    return RPCE_OK;
 }
 
 void
-CRpcClient::UnregisterFunction(PRO_UINT32 functionId)
+CRpcClient::UnregisterFunction(uint32_t functionId)
 {
     if (functionId == 0)
     {
@@ -388,14 +381,14 @@ CRpcClient::UnregisterFunction(PRO_UINT32 functionId)
 }
 
 RPC_ERROR_CODE
-CRpcClient::SendRpcRequest(IRpcPacket*   request,
-                           bool          noreply,             /* = false */
-                           unsigned long rpcTimeoutInSeconds) /* = 0 */
+CRpcClient::SendRpcRequest(IRpcPacket*  request,
+                           bool         noreply,             /* = false */
+                           unsigned int rpcTimeoutInSeconds) /* = 0 */
 {
     assert(request != NULL);
     if (request == NULL)
     {
-        return (RPCE_INVALID_ARGUMENT);
+        return RPCE_INVALID_ARGUMENT;
     }
 
     if (rpcTimeoutInSeconds == 0)
@@ -403,7 +396,7 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
         rpcTimeoutInSeconds = m_configInfo.rpcc_rpc_timeout;
     }
 
-    CRpcPacket* const request2 = (CRpcPacket*)request;
+    CRpcPacket* request2 = (CRpcPacket*)request;
     request2->SetNoreply(noreply);
     request2->SetTimeout(rpcTimeoutInSeconds);
 
@@ -412,36 +405,35 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
 
         if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
         {
-            return (RPCE_ERROR);
+            return RPCE_ERROR;
         }
 
         if (m_msgClient == NULL || m_clientId == 0)
         {
-            return (RPCE_NETWORK_NOT_CONNECTED);
+            return RPCE_NETWORK_NOT_CONNECTED;
         }
 
         if (m_timerId2Hdr.size() >= m_configInfo.rpcc_pending_calls)
         {
-            return (RPCE_CLIENT_BUSY);
+            return RPCE_CLIENT_BUSY;
         }
 
-        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
-            m_funtionId2Info.find(request->GetFunctionId());
+        auto itr = m_funtionId2Info.find(request->GetFunctionId());
         if (itr == m_funtionId2Info.end())
         {
-            return (RPCE_INVALID_FUNCTION);
+            return RPCE_INVALID_FUNCTION;
         }
 
         const RPC_FUNCTION_INFO& info = itr->second;
         if (!CmpRpcPacketTypes(request, info.callArgTypes))
         {
-            return (RPCE_MISMATCHED_PARAMETER);
+            return RPCE_MISMATCHED_PARAMETER;
         }
 
         if (!m_msgClient->SendMsg(
             request->GetTotalBuffer(), request->GetTotalSize(), 0, &RPC_ROOT_ID, 1))
         {
-            return (RPCE_NETWORK_BUSY);
+            return RPCE_NETWORK_BUSY;
         }
 
         if (!noreply)
@@ -453,27 +445,27 @@ CRpcClient::SendRpcRequest(IRpcPacket*   request,
             hdr.magic1     = request->GetMagic1();
             hdr.magic2     = request->GetMagic2();
 
-            const PRO_UINT64 timerId = m_reactor->ScheduleTimer(
-                this, (PRO_UINT64)rpcTimeoutInSeconds * 1000, false);
+            uint64_t timerId = m_reactor->SetupTimer(
+                this, (uint64_t)rpcTimeoutInSeconds * 1000, 0);
 
             m_timerId2Hdr[timerId]             = hdr;
             m_requestId2TimerId[hdr.requestId] = timerId;
         }
     }
 
-    return (RPCE_OK);
+    return RPCE_OK;
 }
 
 bool
-CRpcClient::SendMsgToServer(const void*   buf,
-                            unsigned long size,
-                            PRO_UINT16    charset)
+CRpcClient::SendMsgToServer(const void* buf,
+                            size_t      size,
+                            uint16_t    charset)
 {
     assert(buf != NULL);
     assert(size > 0);
     if (buf == NULL || size == 0)
     {
-        return (false);
+        return false;
     }
 
     bool ret = false;
@@ -483,26 +475,26 @@ CRpcClient::SendMsgToServer(const void*   buf,
 
         if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
         {
-            return (false);
+            return false;
         }
 
         if (m_msgClient == NULL || m_clientId == 0)
         {
-            return (false);
+            return false;
         }
 
         ret = m_msgClient->SendMsg(buf, size, charset, &RPC_ROOT_ID, 1);
     }
 
-    return (ret);
+    return ret;
 }
 
 bool
-CRpcClient::SendMsgToClients(const void*       buf,
-                             unsigned long     size,
-                             PRO_UINT16        charset,
-                             const PRO_UINT64* dstClients,
-                             unsigned char     dstClientCount)
+CRpcClient::SendMsgToClients(const void*     buf,
+                             size_t          size,
+                             uint16_t        charset,
+                             const uint64_t* dstClients,
+                             unsigned char   dstClientCount)
 {
     assert(buf != NULL);
     assert(size > 0);
@@ -510,14 +502,14 @@ CRpcClient::SendMsgToClients(const void*       buf,
     assert(dstClientCount > 0);
     if (buf == NULL || size == 0 || dstClients == NULL || dstClientCount == 0)
     {
-        return (false);
+        return false;
     }
 
     CProStlVector<RTP_MSG_USER> dstUsers;
 
     for (int i = 0; i < (int)dstClientCount; ++i)
     {
-        const RTP_MSG_USER user(RPC_CID, dstClients[i], RPC_IID);
+        RTP_MSG_USER user(RPC_CID, dstClients[i], RPC_IID);
         dstUsers.push_back(user);
     }
 
@@ -528,41 +520,39 @@ CRpcClient::SendMsgToClients(const void*       buf,
 
         if (m_observer == NULL || m_reactor == NULL || m_packet == NULL)
         {
-            return (false);
+            return false;
         }
 
         if (m_msgClient == NULL || m_clientId == 0)
         {
-            return (false);
+            return false;
         }
 
         ret = m_msgClient->SendMsg(
             buf, size, charset, &dstUsers[0], (unsigned char)dstUsers.size());
     }
 
-    return (ret);
+    return ret;
 }
 
 bool
 CRpcClient::Reconnect()
 {
-    return (CMsgClient::Reconnect());
+    return CMsgClient::Reconnect();
 }
 
 void
-CRpcClient::SetMagic(PRO_INT64 magic)
+CRpcClient::SetMagic(int64_t magic)
 {
-    {
-        CProThreadMutexGuard mon(m_lock);
+    CProThreadMutexGuard mon(m_lock);
 
-        m_magic = magic;
-    }
+    m_magic = magic;
 }
 
-PRO_INT64
+int64_t
 CRpcClient::GetMagic() const
 {
-    PRO_INT64 magic = 0;
+    int64_t magic = 0;
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -570,23 +560,21 @@ CRpcClient::GetMagic() const
         magic = m_magic;
     }
 
-    return (magic);
+    return magic;
 }
 
 void
-CRpcClient::SetMagic2(PRO_INT64 magic2)
+CRpcClient::SetMagic2(int64_t magic2)
 {
-    {
-        CProThreadMutexGuard mon(m_lock);
+    CProThreadMutexGuard mon(m_lock);
 
-        m_magic2 = magic2;
-    }
+    m_magic2 = magic2;
 }
 
-PRO_INT64
+int64_t
 CRpcClient::GetMagic2() const
 {
-    PRO_INT64 magic2 = 0;
+    int64_t magic2 = 0;
 
     {
         CProThreadMutexGuard mon(m_lock);
@@ -594,7 +582,7 @@ CRpcClient::GetMagic2() const
         magic2 = m_magic2;
     }
 
-    return (magic2);
+    return magic2;
 }
 
 void
@@ -606,21 +594,19 @@ CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
     assert(myUser != NULL);
     assert(myPublicIp != NULL);
     assert(myPublicIp[0] != '\0');
-    if (msgClient == NULL || myUser == NULL || myPublicIp == NULL ||
-        myPublicIp[0] == '\0')
+    if (msgClient == NULL || myUser == NULL || myPublicIp == NULL || myPublicIp[0] == '\0')
     {
         return;
     }
 
-    const PRO_UINT64 clientId = myUser->UserId();
+    uint64_t clientId = myUser->UserId();
 
     IRpcClientObserver* observer = NULL;
 
     {
         CProThreadMutexGuard mon(m_lock);
 
-        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
-            m_msgClient == NULL)
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL || m_msgClient == NULL)
         {
             return;
         }
@@ -667,8 +653,8 @@ CRpcClient::OnOkMsg(IRtpMsgClient*      msgClient,
 void
 CRpcClient::OnRecvMsg(IRtpMsgClient*      msgClient,
                       const void*         buf,
-                      unsigned long       size,
-                      PRO_UINT16          charset,
+                      size_t              size,
+                      uint16_t            charset,
                       const RTP_MSG_USER* srcUser)
 {
     assert(msgClient != NULL);
@@ -680,8 +666,7 @@ CRpcClient::OnRecvMsg(IRtpMsgClient*      msgClient,
         return;
     }
 
-    if (srcUser->classId  != RPC_ROOT_ID.classId ||
-        srcUser->UserId() != RPC_ROOT_ID.UserId())
+    if (srcUser->classId != RPC_ROOT_ID.classId || srcUser->UserId() != RPC_ROOT_ID.UserId())
     {
         RecvMsg(msgClient, buf, size, charset, srcUser->UserId());
 
@@ -719,8 +704,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
     {
         CProThreadMutexGuard mon(m_lock);
 
-        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
-            m_msgClient == NULL)
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL || m_msgClient == NULL)
         {
             return;
         }
@@ -731,8 +715,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
         }
 
         {
-            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
-                m_funtionId2Info.find(hdr.functionId);
+            auto itr = m_funtionId2Info.find(hdr.functionId);
             if (itr == m_funtionId2Info.end())
             {
                 return;
@@ -745,14 +728,13 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             }
         }
 
-        CProStlMap<PRO_UINT64, PRO_UINT64>::iterator const itr =
-            m_requestId2TimerId.find(hdr.requestId);
+        auto itr = m_requestId2TimerId.find(hdr.requestId);
         if (itr == m_requestId2TimerId.end())
         {
             return;
         }
 
-        const RPC_HDR2 hdr2 = m_timerId2Hdr[itr->second];
+        RPC_HDR2 hdr2 = m_timerId2Hdr[itr->second];
 
         m_reactor->CancelTimer(itr->second);
         m_timerId2Hdr.erase(itr->second);
@@ -783,8 +765,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             if (args.size() > 0)
             {
                 result->CleanAndBeginPushArgument();
-                if (!result->PushArguments(&args[0], args.size()) ||
-                    !result->EndPushArgument())
+                if (!result->PushArguments(&args[0], args.size()) || !result->EndPushArgument())
                 {
                     hdr.rpcCode = RPCE_NOT_ENOUGH_MEMORY;
                     result->Release();
@@ -830,9 +811,9 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
 void
 CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
                     const void*    buf,
-                    unsigned long  size,
-                    PRO_UINT16     charset,
-                    PRO_UINT64     srcClientId)
+                    size_t         size,
+                    uint16_t       charset,
+                    uint64_t       srcClientId)
 {
     assert(msgClient != NULL);
     assert(buf != NULL);
@@ -843,8 +824,7 @@ CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
     {
         CProThreadMutexGuard mon(m_lock);
 
-        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
-            m_msgClient == NULL)
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL || m_msgClient == NULL)
         {
             return;
         }
@@ -872,8 +852,8 @@ CRpcClient::RecvMsg(IRtpMsgClient* msgClient,
 
 void
 CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
-                       long           errorCode,
-                       long           sslCode,
+                       int            errorCode,
+                       int            sslCode,
                        bool           tcpConnected)
 {
     assert(msgClient != NULL);
@@ -882,16 +862,15 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
         return;
     }
 
-    IRpcClientObserver*              observer = NULL;
-    CRpcPacket*                      result   = NULL;
-    PRO_UINT64                       clientId = 0;
-    CProStlMap<PRO_UINT64, RPC_HDR2> timerId2Hdr;
+    IRpcClientObserver*            observer = NULL;
+    CRpcPacket*                    result   = NULL;
+    uint64_t                       clientId = 0;
+    CProStlMap<uint64_t, RPC_HDR2> timerId2Hdr;
 
     {
         CProThreadMutexGuard mon(m_lock);
 
-        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL ||
-            m_msgClient == NULL)
+        if (m_observer == NULL || m_reactor == NULL || m_packet == NULL || m_msgClient == NULL)
         {
             return;
         }
@@ -922,13 +901,12 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
             "\n"
             "%s \n"
             " CRpcClient::OnCloseMsg(id : %llu,"
-            " errorCode : [%d, %d], tcpConnected : %d, server : %s:%u,"
-            " mmType : %u) \n"
+            " errorCode : [%d, %d], tcpConnected : %d, server : %s:%u, mmType : %u) \n"
             ,
             timeString.c_str(),
             (unsigned long long)clientId,
-            (int)errorCode,
-            (int)sslCode,
+            errorCode,
+            sslCode,
             (int)tcpConnected,
             m_msgConfigInfo.msgc_server_ip.c_str(),
             (unsigned int)m_msgConfigInfo.msgc_server_port,
@@ -936,8 +914,8 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
             );
     }}}
 
-    CProStlMap<PRO_UINT64, RPC_HDR2>::iterator       itr = timerId2Hdr.begin();
-    CProStlMap<PRO_UINT64, RPC_HDR2>::iterator const end = timerId2Hdr.end();
+    auto itr = timerId2Hdr.begin();
+    auto end = timerId2Hdr.end();
 
     for (; itr != end; ++itr)
     {
@@ -961,6 +939,7 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
 void
 CRpcClient::OnTimer(void*    factory,
                     uint64_t timerId,
+                    int64_t  tick,
                     int64_t  userData)
 {
     assert(factory != NULL);
@@ -972,7 +951,7 @@ CRpcClient::OnTimer(void*    factory,
 
     IRpcClientObserver* observer = NULL;
     CRpcPacket*         result   = NULL;
-    PRO_UINT64          clientId = 0;
+    uint64_t            clientId = 0;
     RPC_HDR2            hdr;
 
     {
@@ -983,8 +962,7 @@ CRpcClient::OnTimer(void*    factory,
             return;
         }
 
-        CProStlMap<PRO_UINT64, RPC_HDR2>::iterator const itr =
-            m_timerId2Hdr.find(timerId);
+        auto itr = m_timerId2Hdr.find(timerId);
         if (itr == m_timerId2Hdr.end())
         {
             return;

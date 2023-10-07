@@ -39,9 +39,7 @@
 CTest*
 CTest::CreateInstance()
 {
-    CTest* const tester = new CTest;
-
-    return (tester);
+    return new CTest;
 }
 
 CTest::CTest()
@@ -61,7 +59,7 @@ CTest::Init(IProReactor* reactor)
     assert(reactor != NULL);
     if (reactor == NULL)
     {
-        return (false);
+        return false;
     }
 
     {
@@ -71,7 +69,7 @@ CTest::Init(IProReactor* reactor)
         assert(m_client == NULL);
         if (m_reactor != NULL || m_client != NULL)
         {
-            return (false);
+            return false;
         }
 
         m_client = CreateRpcClient(
@@ -87,7 +85,7 @@ CTest::Init(IProReactor* reactor)
             );
         if (m_client == NULL)
         {
-            return (false);
+            return false;
         }
 
         RegisterFunctions(m_client);
@@ -95,7 +93,7 @@ CTest::Init(IProReactor* reactor)
         m_reactor = reactor;
     }
 
-    return (true);
+    return true;
 }
 
 void
@@ -106,15 +104,14 @@ CTest::RegisterFunctions(IRpcClient* client)
     /*
      * function1
      *
-     * bool
-     * ReturnTrue(PRO_INT64& tick);
+     * bool ReturnTrue(int64_t& tick);
      */
     {
-        const RPC_DATA_TYPE callArgTypes[] =
+        RPC_DATA_TYPE callArgTypes[] =
         {
             RPC_DT_INT64
         };
-        const RPC_DATA_TYPE retnArgTypes[] =
+        RPC_DATA_TYPE retnArgTypes[] =
         {
             RPC_DT_BOOL8,
             RPC_DT_INT64
@@ -131,18 +128,17 @@ CTest::RegisterFunctions(IRpcClient* client)
     /*
      * function2
      *
-     * PRO_INT32
-     * Sum(PRO_INT32 a, PRO_INT32 b, const PRO_INT32 c[2], PRO_INT64& tick);
+     * int32_t Sum(int32_t a, int32_t b, const int32_t c[2], int64_t& tick);
      */
     {
-        const RPC_DATA_TYPE callArgTypes[] =
+        RPC_DATA_TYPE callArgTypes[] =
         {
             RPC_DT_INT32,
             RPC_DT_INT32,
             RPC_DT_INT32ARRAY,
             RPC_DT_INT64
         };
-        const RPC_DATA_TYPE retnArgTypes[] =
+        RPC_DATA_TYPE retnArgTypes[] =
         {
             RPC_DT_INT32,
             RPC_DT_INT64
@@ -181,17 +177,13 @@ CTest::Fini()
 unsigned long
 CTest::AddRef()
 {
-    const unsigned long refCount = CProRefCount::AddRef();
-
-    return (refCount);
+    return CProRefCount::AddRef();
 }
 
 unsigned long
 CTest::Release()
 {
-    const unsigned long refCount = CProRefCount::Release();
-
-    return (refCount);
+    return CProRefCount::Release();
 }
 
 RTP_MM_TYPE
@@ -208,7 +200,7 @@ CTest::GetMmType() const
         }
     }
 
-    return (mmType);
+    return mmType;
 }
 
 unsigned short
@@ -228,44 +220,42 @@ CTest::GetServerAddr(char serverIp[64]) const
         }
     }
 
-    return (serverPort);
+    return serverPort;
 }
 
 void
 CTest::Test()
 {
-    const int64_t tick = ProGetTickCount64();
+    int64_t tick = ProGetTickCount64();
 
     Test1(tick);
 
-    const int32_t a    = 0;
-    const int32_t b    = 1;
-    const int32_t c[2] = { 2, 3 };
+    int32_t a    = 0;
+    int32_t b    = 1;
+    int32_t c[2] = { 2, 3 };
     Test2(a, b, c, tick);
 }
 
 void
 CTest::Test1(int64_t tick)
 {
+    CProThreadMutexGuard mon(m_lock);
+
+    if (m_reactor == NULL || m_client == NULL)
     {
-        CProThreadMutexGuard mon(m_lock);
-
-        if (m_reactor == NULL || m_client == NULL)
-        {
-            return;
-        }
-
-        const RPC_ARGUMENT arg(tick);
-
-        IRpcPacket* const request = CreateRpcRequest(RPC_FUNCTION_ID1, &arg, 1);
-        if (request == NULL)
-        {
-            return;
-        }
-
-        m_client->SendRpcRequest(request);
-        request->Release();
+        return;
     }
+
+    RPC_ARGUMENT arg(tick);
+
+    IRpcPacket* request = CreateRpcRequest(RPC_FUNCTION_ID1, &arg, 1);
+    if (request == NULL)
+    {
+        return;
+    }
+
+    m_client->SendRpcRequest(request);
+    request->Release();
 }
 
 void
@@ -274,41 +264,39 @@ CTest::Test2(int32_t       a,
              const int32_t c[2],
              int64_t       tick)
 {
+    CProThreadMutexGuard mon(m_lock);
+
+    if (m_reactor == NULL || m_client == NULL)
     {
-        CProThreadMutexGuard mon(m_lock);
-
-        if (m_reactor == NULL || m_client == NULL)
-        {
-            return;
-        }
-
-        const RPC_ARGUMENT arg0(a);
-        const RPC_ARGUMENT arg1(b);
-        const RPC_ARGUMENT arg2(c, 2);
-        const RPC_ARGUMENT arg3(tick);
-
-        RPC_ARGUMENT args[4];
-        args[0] = arg0;
-        args[1] = arg1;
-        args[2] = arg2;
-        args[3] = arg3;
-
-        IRpcPacket* const request = CreateRpcRequest(
-            RPC_FUNCTION_ID2, args, sizeof(args) / sizeof(RPC_ARGUMENT));
-        if (request == NULL)
-        {
-            return;
-        }
-
-        m_client->SendRpcRequest(request);
-        request->Release();
+        return;
     }
+
+    RPC_ARGUMENT arg0(a);
+    RPC_ARGUMENT arg1(b);
+    RPC_ARGUMENT arg2(c, 2);
+    RPC_ARGUMENT arg3(tick);
+
+    RPC_ARGUMENT args[4];
+    args[0] = arg0;
+    args[1] = arg1;
+    args[2] = arg2;
+    args[3] = arg3;
+
+    IRpcPacket* request = CreateRpcRequest(
+        RPC_FUNCTION_ID2, args, sizeof(args) / sizeof(RPC_ARGUMENT));
+    if (request == NULL)
+    {
+        return;
+    }
+
+    m_client->SendRpcRequest(request);
+    request->Release();
 }
 
 void
 CTest::OnLogoff(IRpcClient* client,
-                long        errorCode,
-                long        sslCode,
+                int         errorCode,
+                int         sslCode,
                 bool        tcpConnected)
 {
     assert(client != NULL);
@@ -345,8 +333,8 @@ CTest::OnRpcResult(IRpcClient* client,
         return;
     }
 
-    const PRO_UINT32     functionId = result->GetFunctionId();
-    const RPC_ERROR_CODE rpcCode    = result->GetRpcCode();
+    uint32_t       functionId = result->GetFunctionId();
+    RPC_ERROR_CODE rpcCode    = result->GetRpcCode();
 
     switch (functionId)
     {
@@ -406,20 +394,19 @@ CTest::Test1_ret(IRpcClient* client,
     RPC_ARGUMENT retnArgs[2];
     result->GetArguments(retnArgs, sizeof(retnArgs) / sizeof(RPC_ARGUMENT));
 
-    const bool    arg_ret  = retnArgs[0].bool8Value;
-    const int64_t arg_tick = retnArgs[1].int64Value;
+    bool    arg_ret  = retnArgs[0].bool8Value;
+    int64_t arg_tick = retnArgs[1].int64Value;
 
     static int64_t s_tick = ProGetTickCount64();
 
-    const int64_t tick = ProGetTickCount64();
+    int64_t tick = ProGetTickCount64();
     if (tick - s_tick >= 1000)
     {{{
         s_tick = tick;
 
         printf(
             "\n"
-            " CTest::Test1_ret(), ret : %d, requestId : %llu,"
-            " TPS : %.1f, RTT' : %d \n"
+            " CTest::Test1_ret(), ret : %d, requestId : %llu, TPS : %.1f, RTT' : %d \n"
             ,
             (int)arg_ret,
             (unsigned long long)result->GetRequestId(),
@@ -458,20 +445,19 @@ CTest::Test2_ret(IRpcClient* client,
     RPC_ARGUMENT retnArgs[2];
     result->GetArguments(retnArgs, sizeof(retnArgs) / sizeof(RPC_ARGUMENT));
 
-    const int32_t arg_ret  = retnArgs[0].int32Value;
-    const int64_t arg_tick = retnArgs[1].int64Value;
+    int32_t arg_ret  = retnArgs[0].int32Value;
+    int64_t arg_tick = retnArgs[1].int64Value;
 
     static int64_t s_tick = ProGetTickCount64();
 
-    const int64_t tick = ProGetTickCount64();
+    int64_t tick = ProGetTickCount64();
     if (tick - s_tick >= 1000)
     {{{
         s_tick = tick;
 
         printf(
             "\n"
-            " CTest::Test2_ret(), ret : %d, requestId : %llu,"
-            " TPS : %.1f, RTT' : %d \n"
+            " CTest::Test2_ret(), ret : %d, requestId : %llu, TPS : %.1f, RTT' : %d \n"
             ,
             (int)arg_ret,
             (unsigned long long)result->GetRequestId(),

@@ -46,21 +46,21 @@ CreateRpcClient(IRpcClientObserver* observer,
 {
     ProRtpInit();
 
-    CRpcClient* const client = CRpcClient::CreateInstance(0, 0);
+    CRpcClient* client = CRpcClient::CreateInstance(0, 0);
     if (client == NULL)
     {
-        return (NULL);
+        return NULL;
     }
 
-    if (!client->Init(observer, reactor, configFileName,
-        mmType, serverIp, serverPort, user, password, localIp))
+    if (!client->Init(observer, reactor, configFileName, mmType,
+        serverIp, serverPort, user, password, localIp))
     {
         client->Release();
 
-        return (NULL);
+        return NULL;
     }
 
-    return (client);
+    return client;
 }
 
 PRO_RPC_API
@@ -74,26 +74,26 @@ CreateRpcClient2(IRpcClientObserver* observer,
                  const RTP_MSG_USER* user,       /* = NULL */
                  const char*         password,   /* = NULL */
                  const char*         localIp,    /* = NULL */
-                 PRO_INT64           magic,      /* = 0 */
-                 PRO_INT64           magic2)     /* = 0 */
+                 int64_t             magic,      /* = 0 */
+                 int64_t             magic2)     /* = 0 */
 {
     ProRtpInit();
 
-    CRpcClient* const client = CRpcClient::CreateInstance(magic, magic2);
+    CRpcClient* client = CRpcClient::CreateInstance(magic, magic2);
     if (client == NULL)
     {
-        return (NULL);
+        return NULL;
     }
 
-    if (!client->Init(observer, reactor, configFileName,
-        mmType, serverIp, serverPort, user, password, localIp))
+    if (!client->Init(observer, reactor, configFileName, mmType,
+        serverIp, serverPort, user, password, localIp))
     {
         client->Release();
 
-        return (NULL);
+        return NULL;
     }
 
-    return (client);
+    return client;
 }
 
 PRO_RPC_API
@@ -105,7 +105,7 @@ DeleteRpcClient(IRpcClient* client)
         return;
     }
 
-    CRpcClient* const p = (CRpcClient*)client;
+    CRpcClient* p = (CRpcClient*)client;
     p->Fini();
     p->Release();
 }
@@ -120,21 +120,20 @@ CreateRpcServer(IRpcServerObserver* observer,
 {
     ProRtpInit();
 
-    CRpcServer* const server = CRpcServer::CreateInstance();
+    CRpcServer* server = CRpcServer::CreateInstance();
     if (server == NULL)
     {
-        return (NULL);
+        return NULL;
     }
 
-    if (!server->Init(
-        observer, reactor, configFileName, mmType, serviceHubPort))
+    if (!server->Init(observer, reactor, configFileName, mmType, serviceHubPort))
     {
         server->Release();
 
-        return (NULL);
+        return NULL;
     }
 
-    return (server);
+    return server;
 }
 
 PRO_RPC_API
@@ -146,28 +145,27 @@ DeleteRpcServer(IRpcServer* server)
         return;
     }
 
-    CRpcServer* const p = (CRpcServer*)server;
+    CRpcServer* p = (CRpcServer*)server;
     p->Fini();
     p->Release();
 }
 
 PRO_RPC_API
 IRpcPacket*
-CreateRpcRequest(PRO_UINT32          functionId,
+CreateRpcRequest(uint32_t            functionId,
                  const RPC_ARGUMENT* args,  /* = NULL */
                  size_t              count) /* = 0 */
 {
     CRpcPacket* packet = CRpcPacket::CreateInstance(functionId, false);
     if (packet == NULL)
     {
-        return (NULL);
+        return NULL;
     }
 
     if (args != NULL && count > 0)
     {
         packet->CleanAndBeginPushArgument();
-        if (!packet->PushArguments(args, count) ||
-            !packet->EndPushArgument())
+        if (!packet->PushArguments(args, count) || !packet->EndPushArgument())
         {
             packet->Release();
             packet = NULL;
@@ -183,14 +181,14 @@ CreateRpcRequest(PRO_UINT32          functionId,
         }
     }
 
-    return (packet);
+    return packet;
 }
 
 PRO_RPC_API
 IRpcPacket*
-CreateRpcResult(PRO_UINT64          clientId,
-                PRO_UINT64          requestId,
-                PRO_UINT32          functionId,
+CreateRpcResult(uint64_t            clientId,
+                uint64_t            requestId,
+                uint32_t            functionId,
                 RPC_ERROR_CODE      rpcCode,
                 const RPC_ARGUMENT* args,  /* = NULL */
                 size_t              count) /* = 0 */
@@ -198,14 +196,13 @@ CreateRpcResult(PRO_UINT64          clientId,
     assert(clientId > 0);
     if (clientId == 0)
     {
-        return (NULL);
+        return NULL;
     }
 
-    CRpcPacket* packet =
-        CRpcPacket::CreateInstance(requestId, functionId, false);
+    CRpcPacket* packet = CRpcPacket::CreateInstance(requestId, functionId, false);
     if (packet == NULL)
     {
-        return (NULL);
+        return NULL;
     }
 
     packet->SetClientId(clientId);
@@ -214,8 +211,7 @@ CreateRpcResult(PRO_UINT64          clientId,
     if (args != NULL && count > 0)
     {
         packet->CleanAndBeginPushArgument();
-        if (!packet->PushArguments(args, count) ||
-            !packet->EndPushArgument())
+        if (!packet->PushArguments(args, count) || !packet->EndPushArgument())
         {
             packet->Release();
             packet = NULL;
@@ -231,7 +227,7 @@ CreateRpcResult(PRO_UINT64          clientId,
         }
     }
 
-    return (packet);
+    return packet;
 }
 
 PRO_RPC_API
@@ -244,7 +240,7 @@ ParseRpcStreamToPacket(const void* streamBuffer,
 
     if (!CRpcPacket::ParseRpcPacket(streamBuffer, streamSize, hdr, args))
     {
-        return (NULL);
+        return NULL;
     }
 
     CRpcPacket* packet = CRpcPacket::CreateInstance(
@@ -254,7 +250,7 @@ ParseRpcStreamToPacket(const void* streamBuffer,
         );
     if (packet == NULL)
     {
-        return (NULL);
+        return NULL;
     }
 
     packet->SetRpcCode(hdr.rpcCode);
@@ -262,8 +258,7 @@ ParseRpcStreamToPacket(const void* streamBuffer,
     if (args.size() > 0)
     {
         packet->CleanAndBeginPushArgument();
-        if (!packet->PushArguments(&args[0], args.size()) ||
-            !packet->EndPushArgument())
+        if (!packet->PushArguments(&args[0], args.size()) || !packet->EndPushArgument())
         {
             packet->Release();
             packet = NULL;
@@ -279,7 +274,7 @@ ParseRpcStreamToPacket(const void* streamBuffer,
         }
     }
 
-    return (packet);
+    return packet;
 }
 
 /////////////////////////////////////////////////////////////////////////////

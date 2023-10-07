@@ -44,7 +44,7 @@ extern "C" {
 /*
  * [[[[ rpc codes
  */
-typedef PRO_INT32 RPC_ERROR_CODE;
+typedef int32_t RPC_ERROR_CODE;
 
 static const RPC_ERROR_CODE RPCE_OK                    =     0;
 static const RPC_ERROR_CODE RPCE_ERROR                 =    -1;
@@ -383,12 +383,12 @@ struct RPC_ARGUMENT
 struct RPC_HDR
 {
     char           signature[8]; /* "***PRPC\0" */
-    PRO_UINT64     requestId;    /* > 0 */
-    PRO_UINT32     functionId;   /* > 0 */
+    uint64_t       requestId;    /* > 0 */
+    uint32_t       functionId;   /* > 0 */
     RPC_ERROR_CODE rpcCode;
     bool           noreply;
     char           reserved[3];
-    PRO_UINT32     timeoutInSeconds;
+    uint32_t       timeoutInSeconds;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -404,20 +404,20 @@ public:
 
     virtual unsigned long Release() = 0;
 
-    virtual PRO_UINT64 GetClientId() const = 0;
+    virtual uint64_t GetClientId() const = 0;
 
-    virtual PRO_UINT64 GetRequestId() const = 0;
+    virtual uint64_t GetRequestId() const = 0;
 
-    virtual PRO_UINT32 GetFunctionId() const = 0;
+    virtual uint32_t GetFunctionId() const = 0;
 
     virtual RPC_ERROR_CODE GetRpcCode() const = 0;
 
     virtual bool GetNoreply() const = 0;
 
-    virtual unsigned long GetArgumentCount() const = 0;
+    virtual size_t GetArgumentCount() const = 0;
 
     virtual void GetArgument(
-        unsigned long index,
+        unsigned int  index,
         RPC_ARGUMENT* arg
         ) const = 0;
 
@@ -430,15 +430,15 @@ public:
 
     virtual const void* GetTotalBuffer() const = 0;
 
-    virtual unsigned long GetTotalSize() const = 0;
+    virtual size_t GetTotalSize() const = 0;
 
-    virtual void SetMagic1(PRO_INT64 magic1) = 0;
+    virtual void SetMagic1(int64_t magic1) = 0;
 
-    virtual PRO_INT64 GetMagic1() const = 0;
+    virtual int64_t GetMagic1() const = 0;
 
-    virtual void SetMagic2(PRO_INT64 magic2) = 0;
+    virtual void SetMagic2(int64_t magic2) = 0;
 
-    virtual PRO_INT64 GetMagic2() const = 0;
+    virtual int64_t GetMagic2() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -456,7 +456,7 @@ public:
 
     virtual RTP_MM_TYPE GetMmType() const = 0;
 
-    virtual PRO_UINT64 GetClientId() const = 0;
+    virtual uint64_t GetClientId() const = 0;
 
     virtual const char* GetServerIp(char serverIp[64]) const = 0;
 
@@ -467,44 +467,44 @@ public:
     virtual unsigned short GetLocalPort() const = 0;
 
     virtual RPC_ERROR_CODE RegisterFunction(
-        PRO_UINT32           functionId,
+        uint32_t             functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
         const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
         size_t               retnArgCount  /* = 0 */
         ) = 0;
 
-    virtual void UnregisterFunction(PRO_UINT32 functionId) = 0;
+    virtual void UnregisterFunction(uint32_t functionId) = 0;
 
     virtual RPC_ERROR_CODE SendRpcRequest(
-        IRpcPacket*   request,
-        bool          noreply             = false,
-        unsigned long rpcTimeoutInSeconds = 0
+        IRpcPacket*  request,
+        bool         noreply             = false,
+        unsigned int rpcTimeoutInSeconds = 0
         ) = 0;
 
     virtual bool SendMsgToServer(
-        const void*       buf,
-        unsigned long     size,
-        PRO_UINT16        charset
+        const void* buf,
+        size_t      size,
+        uint16_t    charset
         ) = 0;
 
     virtual bool SendMsgToClients(
-        const void*       buf,
-        unsigned long     size,
-        PRO_UINT16        charset,
-        const PRO_UINT64* dstClients,
-        unsigned char     dstClientCount
+        const void*     buf,
+        size_t          size,
+        uint16_t        charset,
+        const uint64_t* dstClients,
+        unsigned char   dstClientCount
         ) = 0;
 
     virtual bool Reconnect() = 0;
 
-    virtual void SetMagic(PRO_INT64 magic) = 0;
+    virtual void SetMagic(int64_t magic) = 0;
 
-    virtual PRO_INT64 GetMagic() const = 0;
+    virtual int64_t GetMagic() const = 0;
 
-    virtual void SetMagic2(PRO_INT64 magic2) = 0;
+    virtual void SetMagic2(int64_t magic2) = 0;
 
-    virtual PRO_INT64 GetMagic2() const = 0;
+    virtual int64_t GetMagic2() const = 0;
 };
 
 class IRpcClientObserver
@@ -519,14 +519,14 @@ public:
 
     virtual void OnLogon(
         IRpcClient* client,
-        PRO_UINT64  myClientId,
+        uint64_t    myClientId,
         const char* myPublicIp
         ) = 0;
 
     virtual void OnLogoff(
         IRpcClient* client,
-        long        errorCode,
-        long        sslCode,
+        int         errorCode,
+        int         sslCode,
         bool        tcpConnected
         ) = 0;
 
@@ -536,18 +536,18 @@ public:
         ) = 0;
 
     virtual void OnRecvMsgFromServer(
-        IRpcClient*   client,
-        const void*   buf,
-        unsigned long size,
-        PRO_UINT16    charset
+        IRpcClient* client,
+        const void* buf,
+        size_t      size,
+        uint16_t    charset
         ) = 0;
 
     virtual void OnRecvMsgFromClient(
-        IRpcClient*   client,
-        const void*   buf,
-        unsigned long size,
-        PRO_UINT16    charset,
-        PRO_UINT64    srcClientId
+        IRpcClient* client,
+        const void* buf,
+        size_t      size,
+        uint16_t    charset,
+        uint64_t    srcClientId
         ) = 0;
 };
 
@@ -569,26 +569,26 @@ public:
     virtual unsigned short GetServicePort() const = 0;
 
     virtual RPC_ERROR_CODE RegisterFunction(
-        PRO_UINT32           functionId,
+        uint32_t             functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
         const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
         size_t               retnArgCount  /* = 0 */
         ) = 0;
 
-    virtual void UnregisterFunction(PRO_UINT32 functionId) = 0;
+    virtual void UnregisterFunction(uint32_t functionId) = 0;
 
     virtual RPC_ERROR_CODE SendRpcResult(IRpcPacket* result) = 0;
 
     virtual bool SendMsgToClients(
-        const void*       buf,
-        unsigned long     size,
-        PRO_UINT16        charset,
-        const PRO_UINT64* dstClients,
-        unsigned char     dstClientCount
+        const void*     buf,
+        size_t          size,
+        uint16_t        charset,
+        const uint64_t* dstClients,
+        unsigned char   dstClientCount
         ) = 0;
 
-    virtual void KickoutClient(PRO_UINT64 clientId) = 0;
+    virtual void KickoutClient(uint64_t clientId) = 0;
 };
 
 class IRpcServerObserver
@@ -603,15 +603,15 @@ public:
 
     virtual void OnLogon(
         IRpcServer* server,
-        PRO_UINT64  clientId,
+        uint64_t    clientId,
         const char* clientPublicIp
         ) = 0;
 
     virtual void OnLogoff(
         IRpcServer* server,
-        PRO_UINT64  clientId,
-        long        errorCode,
-        long        sslCode
+        uint64_t    clientId,
+        int         errorCode,
+        int         sslCode
         ) = 0;
 
     virtual void OnRpcRequest(
@@ -620,11 +620,11 @@ public:
         ) = 0;
 
     virtual void OnRecvMsg(
-        IRpcServer*   server,
-        const void*   buf,
-        unsigned long size,
-        PRO_UINT16    charset,
-        PRO_UINT64    srcClientId
+        IRpcServer* server,
+        const void* buf,
+        size_t      size,
+        uint16_t    charset,
+        uint64_t    srcClientId
         ) = 0;
 };
 
@@ -654,8 +654,8 @@ CreateRpcClient2(IRpcClientObserver* observer,
                  const RTP_MSG_USER* user,       /* = NULL */
                  const char*         password,   /* = NULL */
                  const char*         localIp,    /* = NULL */
-                 PRO_INT64           magic,      /* = 0 */
-                 PRO_INT64           magic2);    /* = 0 */
+                 int64_t             magic,      /* = 0 */
+                 int64_t             magic2);    /* = 0 */
 
 PRO_RPC_API
 void
@@ -675,15 +675,15 @@ DeleteRpcServer(IRpcServer* server);
 
 PRO_RPC_API
 IRpcPacket*
-CreateRpcRequest(PRO_UINT32          functionId,
+CreateRpcRequest(uint32_t            functionId,
                  const RPC_ARGUMENT* args,   /* = NULL */
                  size_t              count); /* = 0 */
 
 PRO_RPC_API
 IRpcPacket*
-CreateRpcResult(PRO_UINT64          clientId,
-                PRO_UINT64          requestId,
-                PRO_UINT32          functionId,
+CreateRpcResult(uint64_t            clientId,
+                uint64_t            requestId,
+                uint32_t            functionId,
                 RPC_ERROR_CODE      rpcCode,
                 const RPC_ARGUMENT* args,   /* = NULL */
                 size_t              count); /* = 0 */

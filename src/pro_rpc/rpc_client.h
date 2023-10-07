@@ -56,8 +56,8 @@ struct RPC_HDR2 : public RPC_HDR
         magic2 = 0;
     }
 
-    PRO_INT64 magic1;
-    PRO_INT64 magic2;
+    int64_t magic1;
+    int64_t magic2;
 
     DECLARE_SGI_POOL(0)
 };
@@ -74,8 +74,8 @@ public CMsgClient
 public:
 
     static CRpcClient* CreateInstance(
-        PRO_INT64 magic, /* = 0 */
-        PRO_INT64 magic2 /* = 0 */
+        int64_t magic, /* = 0 */
+        int64_t magic2 /* = 0 */
         );
 
     bool Init(
@@ -98,7 +98,7 @@ public:
 
     virtual RTP_MM_TYPE GetMmType() const;
 
-    virtual PRO_UINT64 GetClientId() const;
+    virtual uint64_t GetClientId() const;
 
     virtual const char* GetServerIp(char serverIp[64]) const;
 
@@ -109,50 +109,50 @@ public:
     virtual unsigned short GetLocalPort() const;
 
     virtual RPC_ERROR_CODE RegisterFunction(
-        PRO_UINT32           functionId,
+        uint32_t             functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
         const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
         size_t               retnArgCount  /* = 0 */
         );
 
-    virtual void UnregisterFunction(PRO_UINT32 functionId);
+    virtual void UnregisterFunction(uint32_t functionId);
 
     virtual RPC_ERROR_CODE SendRpcRequest(
-        IRpcPacket*   request,
-        bool          noreply,            /* = false */
-        unsigned long rpcTimeoutInSeconds /* = 0 */
+        IRpcPacket*  request,
+        bool         noreply,            /* = false */
+        unsigned int rpcTimeoutInSeconds /* = 0 */
         );
 
     virtual bool SendMsgToServer(
-        const void*       buf,
-        unsigned long     size,
-        PRO_UINT16        charset
+        const void* buf,
+        size_t      size,
+        uint16_t    charset
         );
 
     virtual bool SendMsgToClients(
-        const void*       buf,
-        unsigned long     size,
-        PRO_UINT16        charset,
-        const PRO_UINT64* dstClients,
-        unsigned char     dstClientCount
+        const void*     buf,
+        size_t          size,
+        uint16_t        charset,
+        const uint64_t* dstClients,
+        unsigned char   dstClientCount
         );
 
     virtual bool Reconnect();
 
-    virtual void SetMagic(PRO_INT64 magic);
+    virtual void SetMagic(int64_t magic);
 
-    virtual PRO_INT64 GetMagic() const;
+    virtual int64_t GetMagic() const;
 
-    virtual void SetMagic2(PRO_INT64 magic2);
+    virtual void SetMagic2(int64_t magic2);
 
-    virtual PRO_INT64 GetMagic2() const;
+    virtual int64_t GetMagic2() const;
 
 private:
 
     CRpcClient(
-        PRO_INT64 magic, /* = 0 */
-        PRO_INT64 magic2 /* = 0 */
+        int64_t magic, /* = 0 */
+        int64_t magic2 /* = 0 */
         );
 
     virtual ~CRpcClient();
@@ -166,21 +166,22 @@ private:
     virtual void OnRecvMsg(
         IRtpMsgClient*      msgClient,
         const void*         buf,
-        unsigned long       size,
-        PRO_UINT16          charset,
+        size_t              size,
+        uint16_t            charset,
         const RTP_MSG_USER* srcUser
         );
 
     virtual void OnCloseMsg(
         IRtpMsgClient* msgClient,
-        long           errorCode,
-        long           sslCode,
+        int            errorCode,
+        int            sslCode,
         bool           tcpConnected
         );
 
     virtual void OnTimer(
         void*    factory,
         uint64_t timerId,
+        int64_t  tick,
         int64_t  userData
         );
 
@@ -192,24 +193,24 @@ private:
 
     void RecvMsg(
         IRtpMsgClient* msgClient,
-        const void*    buf,
-        unsigned long  size,
-        PRO_UINT16     charset,
-        PRO_UINT64     srcClientId
+        const void*   buf,
+        size_t        size,
+        uint16_t      charset,
+        uint64_t      srcClientId
         );
 
 private:
 
-    IRpcClientObserver*                       m_observer;
-    RPC_CLIENT_CONFIG_INFO                    m_configInfo;
-    CRpcPacket*                               m_packet;
-    PRO_UINT64                                m_clientId;
-    PRO_INT64                                 m_magic;
-    PRO_INT64                                 m_magic2;
+    IRpcClientObserver*                     m_observer;
+    RPC_CLIENT_CONFIG_INFO                  m_configInfo;
+    CRpcPacket*                             m_packet;
+    uint64_t                                m_clientId;
+    int64_t                                 m_magic;
+    int64_t                                 m_magic2;
 
-    CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO> m_funtionId2Info;
-    CProStlMap<PRO_UINT64, RPC_HDR2>          m_timerId2Hdr;
-    CProStlMap<PRO_UINT64, PRO_UINT64>        m_requestId2TimerId;
+    CProStlMap<uint32_t, RPC_FUNCTION_INFO> m_funtionId2Info;
+    CProStlMap<uint64_t, RPC_HDR2>          m_timerId2Hdr;
+    CProStlMap<uint64_t, uint64_t>          m_requestId2TimerId;
 
     DECLARE_SGI_POOL(0)
 };

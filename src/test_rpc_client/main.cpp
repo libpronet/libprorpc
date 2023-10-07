@@ -87,5 +87,5 @@ EXIT:
     ProDeleteReactor(reactor);
     ProSleep(3000);
 
-    return (0);
+    return 0;
 }

@@ -84,26 +84,26 @@ public:
     virtual unsigned short GetServicePort() const;
 
     virtual RPC_ERROR_CODE RegisterFunction(
-        PRO_UINT32           functionId,
+        uint32_t             functionId,
         const RPC_DATA_TYPE* callArgTypes, /* = NULL */
         size_t               callArgCount, /* = 0 */
         const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
         size_t               retnArgCount  /* = 0 */
         );
 
-    virtual void UnregisterFunction(PRO_UINT32 functionId);
+    virtual void UnregisterFunction(uint32_t functionId);
 
     virtual RPC_ERROR_CODE SendRpcResult(IRpcPacket* result);
 
     virtual bool SendMsgToClients(
-        const void*       buf,
-        unsigned long     size,
-        PRO_UINT16        charset,
-        const PRO_UINT64* dstClients,
-        unsigned char     dstClientCount
+        const void*     buf,
+        size_t          size,
+        uint16_t        charset,
+        const uint64_t* dstClients,
+        unsigned char   dstClientCount
         );
 
-    virtual void KickoutClient(PRO_UINT64 clientId);
+    virtual void KickoutClient(uint64_t clientId);
 
 private:
 
@@ -116,8 +116,8 @@ private:
         const RTP_MSG_USER* user,
         const char*         userPublicIp,
         const RTP_MSG_USER* c2sUser, /* = NULL */
-        const char          hash[32],
-        const char          nonce[32],
+        const unsigned char hash[32],
+        const unsigned char nonce[32],
         uint64_t*           userId,
         uint16_t*           instId,
         int64_t*            appData,
@@ -135,14 +135,14 @@ private:
     virtual void OnCloseUser(
         IRtpMsgServer*      msgServer,
         const RTP_MSG_USER* user,
-        long                errorCode,
-        long                sslCode
+        int                 errorCode,
+        int                 sslCode
         );
 
     virtual void OnRecvMsg(
         IRtpMsgServer*      msgServer,
         const void*         buf,
-        unsigned long       size,
+        size_t              size,
         uint16_t            charset,
         const RTP_MSG_USER* srcUser
         );
@@ -151,21 +151,21 @@ private:
         IRtpMsgServer*                     msgServer,
         RPC_HDR                            hdr,
         const CProStlVector<RPC_ARGUMENT>& args,
-        PRO_UINT64                         srcClientId
+        uint64_t                           srcClientId
         );
 
     void RecvMsg(
         IRtpMsgServer* msgServer,
         const void*    buf,
-        unsigned long  size,
-        PRO_UINT16     charset,
-        PRO_UINT64     srcClientId
+        size_t         size,
+        uint16_t       charset,
+        uint64_t       srcClientId
         );
 
     void SendErrorCode(
-        PRO_UINT64     clientId,
-        PRO_UINT64     requestId,
-        PRO_UINT32     functionId,
+        uint64_t       clientId,
+        uint64_t       requestId,
+        uint32_t       functionId,
         RPC_ERROR_CODE rpcCode
         );
 
@@ -173,10 +173,10 @@ private:
 
 private:
 
-    IRpcServerObserver*                       m_observer;
-    RPC_SERVER_CONFIG_INFO                    m_configInfo;
-    CProChannelTaskPool*                      m_taskPool;
-    CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO> m_funtionId2Info;
+    IRpcServerObserver*                     m_observer;
+    RPC_SERVER_CONFIG_INFO                  m_configInfo;
+    CProChannelTaskPool*                    m_taskPool;
+    CProStlMap<uint32_t, RPC_FUNCTION_INFO> m_funtionId2Info;
 
     DECLARE_SGI_POOL(0)
 };

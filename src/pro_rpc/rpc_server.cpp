@@ -34,9 +34,10 @@
 /////////////////////////////////////////////////////////////////////////////
 ////
 
-static const unsigned char C2S_CID = 1;
-static const unsigned char RPC_CID = 2;
-static const PRO_UINT16    RPC_IID = 1;
+static const unsigned char SERVER_CID = 1;
+static const unsigned char C2S_CID    = 255;
+static const unsigned char RPC_CID    = 2;
+static const uint16_t      RPC_IID    = 1;
 
 typedef void (CRpcServer::* ACTION)(int64_t*);
 
@@ -48,8 +49,8 @@ void
 ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
              RPC_SERVER_CONFIG_INFO&               configInfo)
 {
-    int       i = 0;
-    const int c = (int)configs.size();
+    int i = 0;
+    int c = (int)configs.size();
 
     for (; i < c; ++i)
     {
@@ -58,7 +59,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
 
         if (stricmp(configName.c_str(), "rpcs_pending_calls") == 0)
         {
-            const int value = atoi(configValue.c_str());
+            int value = atoi(configValue.c_str());
             if (value > 0)
             {
                 configInfo.rpcs_pending_calls = value;
@@ -66,7 +67,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
         }
         else if (stricmp(configName.c_str(), "rpcs_worker_count") == 0)
         {
-            const int value = atoi(configValue.c_str());
+            int value = atoi(configValue.c_str());
             if (value > 0 && value <= 100)
             {
                 configInfo.rpcs_worker_count = value;
@@ -84,9 +85,7 @@ ReadConfig_i(const CProStlVector<PRO_CONFIG_ITEM>& configs,
 CRpcServer*
 CRpcServer::CreateInstance()
 {
-    CRpcServer* const server = new CRpcServer;
-
-    return (server);
+   return new CRpcServer;
 }
 
 CRpcServer::CRpcServer()
@@ -111,10 +110,9 @@ CRpcServer::Init(IRpcServerObserver* observer,
     assert(reactor != NULL);
     assert(configFileName != NULL);
     assert(configFileName[0] != '\0');
-    if (observer == NULL || reactor == NULL || configFileName == NULL ||
-        configFileName[0] == '\0')
+    if (observer == NULL || reactor == NULL || configFileName == NULL || configFileName[0] == '\0')
     {
-        return (false);
+        return false;
     }
 
     char exeRoot[1024] = "";
@@ -135,7 +133,7 @@ CRpcServer::Init(IRpcServerObserver* observer,
     CProStlVector<PRO_CONFIG_ITEM> configs;
     if (!configFile.Read(configs))
     {
-        return (false);
+        return false;
     }
 
     RPC_SERVER_CONFIG_INFO configInfo;
@@ -150,11 +148,10 @@ CRpcServer::Init(IRpcServerObserver* observer,
         assert(m_taskPool == NULL);
         if (m_observer != NULL || m_taskPool != NULL)
         {
-            return (false);
+            return false;
         }
 
-        if (!CMsgServer::Init(
-            reactor, configFileName, mmType, serviceHubPort))
+        if (!CMsgServer::Init(reactor, configFileName, mmType, serviceHubPort))
         {
             goto EXIT;
         }
@@ -171,7 +168,7 @@ CRpcServer::Init(IRpcServerObserver* observer,
         m_taskPool   = taskPool;
     }
 
-    return (true);
+    return true;
 
 EXIT:
 
@@ -179,7 +176,7 @@ EXIT:
 
     CMsgServer::Fini();
 
-    return (false);
+    return false;
 }
 
 void
@@ -212,17 +209,13 @@ CRpcServer::Fini()
 unsigned long
 CRpcServer::AddRef()
 {
-    const unsigned long refCount = CMsgServer::AddRef();
-
-    return (refCount);
+    return CMsgServer::AddRef();
 }
 
 unsigned long
 CRpcServer::Release()
 {
-    const unsigned long refCount = CMsgServer::Release();
-
-    return (refCount);
+    return CMsgServer::Release();
 }
 
 RTP_MM_TYPE
@@ -236,7 +229,7 @@ CRpcServer::GetMmType() const
         mmType = m_msgConfigInfo.msgs_mm_type;
     }
 
-    return (mmType);
+    return mmType;
 }
 
 unsigned short
@@ -250,11 +243,11 @@ CRpcServer::GetServicePort() const
         servicePort = m_msgConfigInfo.msgs_hub_port;
     }
 
-    return (servicePort);
+    return servicePort;
 }
 
 RPC_ERROR_CODE
-CRpcServer::RegisterFunction(PRO_UINT32           functionId,
+CRpcServer::RegisterFunction(uint32_t             functionId,
                              const RPC_DATA_TYPE* callArgTypes, /* = NULL */
                              size_t               callArgCount, /* = 0 */
                              const RPC_DATA_TYPE* retnArgTypes, /* = NULL */
@@ -263,7 +256,7 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
     assert(functionId > 0);
     if (functionId == 0)
     {
-        return (RPCE_INVALID_ARGUMENT);
+        return RPCE_INVALID_ARGUMENT;
     }
 
     if (
@@ -274,7 +267,7 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
     {
         assert(0);
 
-        return (RPCE_INVALID_ARGUMENT);
+        return RPCE_INVALID_ARGUMENT;
     }
 
     for (int i = 0; i < (int)callArgCount; ++i)
@@ -282,7 +275,7 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
         assert(CheckRpcDataType(callArgTypes[i]));
         if (!CheckRpcDataType(callArgTypes[i]))
         {
-            return (RPCE_INVALID_ARGUMENT);
+            return RPCE_INVALID_ARGUMENT;
         }
     }
 
@@ -291,7 +284,7 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
         assert(CheckRpcDataType(retnArgTypes[j]));
         if (!CheckRpcDataType(retnArgTypes[j]))
         {
-            return (RPCE_INVALID_ARGUMENT);
+            return RPCE_INVALID_ARGUMENT;
         }
     }
 
@@ -300,7 +293,7 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
 
         if (m_observer == NULL || m_taskPool == NULL)
         {
-            return (RPCE_ERROR);
+            return RPCE_ERROR;
         }
 
         RPC_FUNCTION_INFO& info = m_funtionId2Info[functionId]; /* insert */
@@ -318,11 +311,11 @@ CRpcServer::RegisterFunction(PRO_UINT32           functionId,
         }
     }
 
-    return (RPCE_OK);
+    return RPCE_OK;
 }
 
 void
-CRpcServer::UnregisterFunction(PRO_UINT32 functionId)
+CRpcServer::UnregisterFunction(uint32_t functionId)
 {
     if (functionId == 0)
     {
@@ -347,7 +340,7 @@ CRpcServer::SendRpcResult(IRpcPacket* result)
     assert(result != NULL);
     if (result == NULL)
     {
-        return (RPCE_INVALID_ARGUMENT);
+        return RPCE_INVALID_ARGUMENT;
     }
 
     {
@@ -355,14 +348,13 @@ CRpcServer::SendRpcResult(IRpcPacket* result)
 
         if (m_observer == NULL || m_taskPool == NULL || m_msgServer == NULL)
         {
-            return (RPCE_ERROR);
+            return RPCE_ERROR;
         }
 
-        CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
-            m_funtionId2Info.find(result->GetFunctionId());
+        auto itr = m_funtionId2Info.find(result->GetFunctionId());
         if (itr == m_funtionId2Info.end())
         {
-            return (RPCE_INVALID_FUNCTION);
+            return RPCE_INVALID_FUNCTION;
         }
 
         if (result->GetRpcCode() == RPCE_OK)
@@ -370,28 +362,27 @@ CRpcServer::SendRpcResult(IRpcPacket* result)
             const RPC_FUNCTION_INFO& info = itr->second;
             if (!CmpRpcPacketTypes(result, info.retnArgTypes))
             {
-                return (RPCE_MISMATCHED_PARAMETER);
+                return RPCE_MISMATCHED_PARAMETER;
             }
         }
 
-        const RTP_MSG_USER user(RPC_CID, result->GetClientId(), RPC_IID);
+        RTP_MSG_USER user(RPC_CID, result->GetClientId(), RPC_IID);
 
-        if (!m_msgServer->SendMsg(
-            result->GetTotalBuffer(), result->GetTotalSize(), 0, &user, 1))
+        if (!m_msgServer->SendMsg(result->GetTotalBuffer(), result->GetTotalSize(), 0, &user, 1))
         {
-            return (RPCE_ERROR);
+            return RPCE_ERROR;
         }
     }
 
-    return (RPCE_OK);
+    return RPCE_OK;
 }
 
 bool
-CRpcServer::SendMsgToClients(const void*       buf,
-                             unsigned long     size,
-                             PRO_UINT16        charset,
-                             const PRO_UINT64* dstClients,
-                             unsigned char     dstClientCount)
+CRpcServer::SendMsgToClients(const void*     buf,
+                             size_t          size,
+                             uint16_t        charset,
+                             const uint64_t* dstClients,
+                             unsigned char   dstClientCount)
 {
     assert(buf != NULL);
     assert(size > 0);
@@ -399,14 +390,14 @@ CRpcServer::SendMsgToClients(const void*       buf,
     assert(dstClientCount > 0);
     if (buf == NULL || size == 0 || dstClients == NULL || dstClientCount == 0)
     {
-        return (false);
+        return false;
     }
 
     CProStlVector<RTP_MSG_USER> dstUsers;
 
     for (int i = 0; i < (int)dstClientCount; ++i)
     {
-        const RTP_MSG_USER user(RPC_CID, dstClients[i], RPC_IID);
+        RTP_MSG_USER user(RPC_CID, dstClients[i], RPC_IID);
         dstUsers.push_back(user);
     }
 
@@ -417,18 +408,18 @@ CRpcServer::SendMsgToClients(const void*       buf,
 
         if (m_observer == NULL || m_taskPool == NULL || m_msgServer == NULL)
         {
-            return (false);
+            return false;
         }
 
         ret = m_msgServer->SendMsg(
             buf, size, charset, &dstUsers[0], (unsigned char)dstUsers.size());
     }
 
-    return (ret);
+    return ret;
 }
 
 void
-CRpcServer::KickoutClient(PRO_UINT64 clientId)
+CRpcServer::KickoutClient(uint64_t clientId)
 {
     if (clientId == 0)
     {
@@ -443,7 +434,7 @@ CRpcServer::KickoutClient(PRO_UINT64 clientId)
             return;
         }
 
-        const RTP_MSG_USER user(RPC_CID, clientId, RPC_IID);
+        RTP_MSG_USER user(RPC_CID, clientId, RPC_IID);
         m_msgServer->KickoutUser(&user);
     }
 }
@@ -453,8 +444,8 @@ CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
                         const RTP_MSG_USER* user,
                         const char*         userPublicIp,
                         const RTP_MSG_USER* c2sUser, /* = NULL */
-                        const char          hash[32],
-                        const char          nonce[32],
+                        const unsigned char hash[32],
+                        const unsigned char nonce[32],
                         uint64_t*           userId,
                         uint16_t*           instId,
                         int64_t*            appData,
@@ -463,12 +454,15 @@ CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
     if (!CMsgServer::OnCheckUser(msgServer, user, userPublicIp,
         c2sUser, hash, nonce, userId, instId, appData, isC2s))
     {
-        return (false);
+        return false;
     }
 
-    if (user->classId == C2S_CID)
+    if (user->classId == SERVER_CID || user->classId == C2S_CID)
     {
-        *isC2s  = true;
+        if (c2sUser == NULL)
+        {
+            *isC2s = true;
+        }
     }
     else if (user->classId == RPC_CID)
     {
@@ -476,10 +470,10 @@ CRpcServer::OnCheckUser(IRtpMsgServer*      msgServer,
     }
     else
     {
-        return (false);
+        return false;
     }
 
-    return (true);
+    return true;
 }
 
 void
@@ -493,8 +487,7 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
     assert(user != NULL);
     assert(userPublicIp != NULL);
     assert(userPublicIp[0] != '\0');
-    if (msgServer == NULL || user == NULL || userPublicIp == NULL ||
-        userPublicIp[0] == '\0')
+    if (msgServer == NULL || user == NULL || userPublicIp == NULL || userPublicIp[0] == '\0')
     {
         return;
     }
@@ -504,7 +497,7 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
         return;
     }
 
-    const PRO_UINT64 clientId = user->UserId();
+    uint64_t clientId = user->UserId();
 
     IRpcServerObserver* observer = NULL;
 
@@ -534,8 +527,8 @@ CRpcServer::OnOkUser(IRtpMsgServer*      msgServer,
 void
 CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
                         const RTP_MSG_USER* user,
-                        long                errorCode,
-                        long                sslCode)
+                        int                 errorCode,
+                        int                 sslCode)
 {
     assert(msgServer != NULL);
     assert(user != NULL);
@@ -549,7 +542,7 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
         return;
     }
 
-    const PRO_UINT64 clientId = user->UserId();
+    uint64_t clientId = user->UserId();
 
     IRpcServerObserver* observer = NULL;
 
@@ -579,7 +572,7 @@ CRpcServer::OnCloseUser(IRtpMsgServer*      msgServer,
 void
 CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
                       const void*         buf,
-                      unsigned long       size,
+                      size_t              size,
                       uint16_t            charset,
                       const RTP_MSG_USER* srcUser)
 {
@@ -597,7 +590,7 @@ CRpcServer::OnRecvMsg(IRtpMsgServer*      msgServer,
         return;
     }
 
-    const PRO_UINT64 srcClientId = srcUser->UserId();
+    uint64_t srcClientId = srcUser->UserId();
 
     RPC_HDR                     hdr;
     CProStlVector<RPC_ARGUMENT> args;
@@ -616,7 +609,7 @@ void
 CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
                     RPC_HDR                            hdr,
                     const CProStlVector<RPC_ARGUMENT>& args,
-                    PRO_UINT64                         srcClientId)
+                    uint64_t                           srcClientId)
 {
     assert(msgServer != NULL);
 
@@ -639,8 +632,7 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
         }
 
         {
-            CProStlMap<PRO_UINT32, RPC_FUNCTION_INFO>::iterator const itr =
-                m_funtionId2Info.find(hdr.functionId);
+            auto itr = m_funtionId2Info.find(hdr.functionId);
             if (itr == m_funtionId2Info.end())
             {
                 return;
@@ -657,8 +649,7 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
         {
             if (!hdr.noreply)
             {
-                SendErrorCode(srcClientId, hdr.requestId, hdr.functionId,
-                    RPCE_SERVER_BUSY);
+                SendErrorCode(srcClientId, hdr.requestId, hdr.functionId, RPCE_SERVER_BUSY);
             }
 
             return;
@@ -681,8 +672,7 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
         if (args.size() > 0)
         {
             request->CleanAndBeginPushArgument();
-            if (!request->PushArguments(&args[0], args.size()) ||
-                !request->EndPushArgument())
+            if (!request->PushArguments(&args[0], args.size()) || !request->EndPushArgument())
             {
                 request->Release();
                 request = NULL;
@@ -703,7 +693,7 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
             return;
         }
 
-        IProFunctorCommand* const command =
+        IProFunctorCommand* command =
             CProFunctorCommand_cpp<CRpcServer, ACTION>::CreateInstance(
                 *this,
                 &CRpcServer::AsyncRecvRpc,
@@ -717,8 +707,8 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
 void
 CRpcServer::AsyncRecvRpc(int64_t* args)
 {
-    CRpcPacket* const request     = (CRpcPacket*)args[0];
-    const int64_t     arrivalTick =              args[1];
+    CRpcPacket* request     = (CRpcPacket*)args[0];
+    int64_t     arrivalTick =              args[1];
 
     /*
      * check timeout
@@ -752,11 +742,11 @@ CRpcServer::AsyncRecvRpc(int64_t* args)
 }
 
 void
-CRpcServer::RecvMsg(IRtpMsgServer*      msgServer,
-                    const void*         buf,
-                    unsigned long       size,
-                    PRO_UINT16          charset,
-                    PRO_UINT64          srcClientId)
+CRpcServer::RecvMsg(IRtpMsgServer* msgServer,
+                    const void*    buf,
+                    size_t         size,
+                    uint16_t       charset,
+                    uint64_t       srcClientId)
 {
     assert(msgServer != NULL);
     assert(buf != NULL);
@@ -786,9 +776,9 @@ CRpcServer::RecvMsg(IRtpMsgServer*      msgServer,
 }
 
 void
-CRpcServer::SendErrorCode(PRO_UINT64     clientId,
-                          PRO_UINT64     requestId,
-                          PRO_UINT32     functionId,
+CRpcServer::SendErrorCode(uint64_t       clientId,
+                          uint64_t       requestId,
+                          uint32_t       functionId,
                           RPC_ERROR_CODE rpcCode)
 {
     assert(clientId > 0);
@@ -797,14 +787,13 @@ CRpcServer::SendErrorCode(PRO_UINT64     clientId,
     assert(rpcCode < 0);
     assert(m_msgServer != NULL);
 
-    IRpcPacket* const result =
-        CreateRpcResult(clientId, requestId, functionId, rpcCode, NULL, 0);
+    IRpcPacket* result = CreateRpcResult(clientId, requestId, functionId, rpcCode, NULL, 0);
     if (result == NULL)
     {
         return;
     }
 
-    const RTP_MSG_USER user(RPC_CID, clientId, RPC_IID);
+    RTP_MSG_USER user(RPC_CID, clientId, RPC_IID);
 
     m_msgServer->SendMsg(result->GetTotalBuffer(), result->GetTotalSize(), 0, &user, 1);
     result->Release();
