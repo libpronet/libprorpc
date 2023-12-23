@@ -339,29 +339,25 @@ CTest::OnRpcResult(IRpcClient* client,
     switch (functionId)
     {
     case RPC_FUNCTION_ID1:
+        if (rpcCode == RPCE_OK)
         {
-            if (rpcCode == RPCE_OK)
-            {
-                Test1_ret(client, result);
-            }
-            else
-            {
-                Test1_err(client, result);
-            }
-            break;
+            Test1_ret(client, result);
         }
+        else
+        {
+            Test1_err(client, result);
+        }
+        break;
     case RPC_FUNCTION_ID2:
+        if (rpcCode == RPCE_OK)
         {
-            if (rpcCode == RPCE_OK)
-            {
-                Test2_ret(client, result);
-            }
-            else
-            {
-                Test2_err(client, result);
-            }
-            break;
+            Test2_ret(client, result);
         }
+        else
+        {
+            Test2_err(client, result);
+        }
+        break;
     }
 }
 

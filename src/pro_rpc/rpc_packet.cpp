@@ -193,54 +193,42 @@ GetNaluSize_i(const RPC_ARGUMENT& arg)
     case RPC_DT_UINT64:
     case RPC_DT_FLOAT32:
     case RPC_DT_FLOAT64:
-        {
-            break;
-        }
+        break;
     case RPC_DT_BOOL8ARRAY:
     case RPC_DT_INT8ARRAY:
     case RPC_DT_UINT8ARRAY:
+        if (arg.countForArray > 0 && arg.uint8Values != NULL)
         {
-            if (arg.countForArray > 0 && arg.uint8Values != NULL)
-            {
-                size += (1 * arg.countForArray + 3) / 4 * 4;
-            }
-            break;
+            size += (1 * arg.countForArray + 3) / 4 * 4;
         }
+        break;
     case RPC_DT_INT16ARRAY:
     case RPC_DT_UINT16ARRAY:
+        if (arg.countForArray > 0 && arg.uint16Values != NULL)
         {
-            if (arg.countForArray > 0 && arg.uint16Values != NULL)
-            {
-                size += (2 * arg.countForArray + 3) / 4 * 4;
-            }
-            break;
+            size += (2 * arg.countForArray + 3) / 4 * 4;
         }
+        break;
     case RPC_DT_INT32ARRAY:
     case RPC_DT_UINT32ARRAY:
     case RPC_DT_FLOAT32ARRAY:
+        if (arg.countForArray > 0 && arg.uint32Values != NULL)
         {
-            if (arg.countForArray > 0 && arg.uint32Values != NULL)
-            {
-                size += 4 * arg.countForArray;
-            }
-            break;
+            size += 4 * arg.countForArray;
         }
+        break;
     case RPC_DT_INT64ARRAY:
     case RPC_DT_UINT64ARRAY:
     case RPC_DT_FLOAT64ARRAY:
+        if (arg.countForArray > 0 && arg.uint64Values != NULL)
         {
-            if (arg.countForArray > 0 && arg.uint64Values != NULL)
-            {
-                size += 8 * arg.countForArray;
-            }
-            break;
+            size += 8 * arg.countForArray;
         }
+        break;
     default:
-        {
-            assert(0);
-            size = 0;
-            break;
-        }
+        assert(0);
+        size = 0;
+        break;
     } /* end of switch () */
 
     return size;
@@ -362,114 +350,112 @@ CRpcPacket::ParseRpcPacket(const void*                  buffer,
             case RPC_DT_UINT64:
             case RPC_DT_FLOAT32:
             case RPC_DT_FLOAT64:
-                {
-                    args.push_back(arg);
-                    ret2 = true;
-                    break;
-                }
+                args.push_back(arg);
+                ret2 = true;
+                break;
             case RPC_DT_BOOL8ARRAY:
             case RPC_DT_INT8ARRAY:
             case RPC_DT_UINT8ARRAY:
+            {
+                arg.countForArray = pbsd_ntoh32(arg.countForArray);
+                if (arg.countForArray == 0)
                 {
-                    arg.countForArray = pbsd_ntoh32(arg.countForArray);
-                    if (arg.countForArray == 0)
-                    {
-                        arg.uint8Values = NULL;
-                    }
-                    else
-                    {
-                        size_t bodySize = (1 * arg.countForArray + 3) / 4 * 4;
-                        needSize += bodySize;
-                        if (size < needSize)
-                        {
-                            break;
-                        }
-
-                        arg.uint8Values = (unsigned char*)now;
-                        now += bodySize;
-                    }
-
-                    args.push_back(arg);
-                    ret2 = true;
-                    break;
+                    arg.uint8Values = NULL;
                 }
+                else
+                {
+                    size_t bodySize = (1 * arg.countForArray + 3) / 4 * 4;
+                    needSize += bodySize;
+                    if (size < needSize)
+                    {
+                        break;
+                    }
+
+                    arg.uint8Values = (unsigned char*)now;
+                    now += bodySize;
+                }
+
+                args.push_back(arg);
+                ret2 = true;
+                break;
+            }
             case RPC_DT_INT16ARRAY:
             case RPC_DT_UINT16ARRAY:
+            {
+                arg.countForArray = pbsd_ntoh32(arg.countForArray);
+                if (arg.countForArray == 0)
                 {
-                    arg.countForArray = pbsd_ntoh32(arg.countForArray);
-                    if (arg.countForArray == 0)
-                    {
-                        arg.uint16Values = NULL;
-                    }
-                    else
-                    {
-                        size_t bodySize = (2 * arg.countForArray + 3) / 4 * 4;
-                        needSize += bodySize;
-                        if (size < needSize)
-                        {
-                            break;
-                        }
-
-                        arg.uint16Values = (uint16_t*)now;
-                        now += bodySize;
-                    }
-
-                    args.push_back(arg);
-                    ret2 = true;
-                    break;
+                    arg.uint16Values = NULL;
                 }
+                else
+                {
+                    size_t bodySize = (2 * arg.countForArray + 3) / 4 * 4;
+                    needSize += bodySize;
+                    if (size < needSize)
+                    {
+                        break;
+                    }
+
+                    arg.uint16Values = (uint16_t*)now;
+                    now += bodySize;
+                }
+
+                args.push_back(arg);
+                ret2 = true;
+                break;
+            }
             case RPC_DT_INT32ARRAY:
             case RPC_DT_UINT32ARRAY:
             case RPC_DT_FLOAT32ARRAY:
+            {
+                arg.countForArray = pbsd_ntoh32(arg.countForArray);
+                if (arg.countForArray == 0)
                 {
-                    arg.countForArray = pbsd_ntoh32(arg.countForArray);
-                    if (arg.countForArray == 0)
-                    {
-                        arg.uint32Values = NULL;
-                    }
-                    else
-                    {
-                        size_t bodySize = 4 * arg.countForArray;
-                        needSize += bodySize;
-                        if (size < needSize)
-                        {
-                            break;
-                        }
-
-                        arg.uint32Values = (uint32_t*)now;
-                        now += bodySize;
-                    }
-
-                    args.push_back(arg);
-                    ret2 = true;
-                    break;
+                    arg.uint32Values = NULL;
                 }
+                else
+                {
+                    size_t bodySize = 4 * arg.countForArray;
+                    needSize += bodySize;
+                    if (size < needSize)
+                    {
+                        break;
+                    }
+
+                    arg.uint32Values = (uint32_t*)now;
+                    now += bodySize;
+                }
+
+                args.push_back(arg);
+                ret2 = true;
+                break;
+            }
             case RPC_DT_INT64ARRAY:
             case RPC_DT_UINT64ARRAY:
             case RPC_DT_FLOAT64ARRAY:
+            {
+                arg.countForArray = pbsd_ntoh32(arg.countForArray);
+                if (arg.countForArray == 0)
                 {
-                    arg.countForArray = pbsd_ntoh32(arg.countForArray);
-                    if (arg.countForArray == 0)
-                    {
-                        arg.uint64Values = NULL;
-                    }
-                    else
-                    {
-                        size_t bodySize = 8 * arg.countForArray;
-                        needSize += bodySize;
-                        if (size < needSize)
-                        {
-                            break;
-                        }
-
-                        arg.uint64Values = (uint64_t*)now;
-                        now += bodySize;
-                    }
-
-                    args.push_back(arg);
-                    ret2 = true;
-                    break;
+                    arg.uint64Values = NULL;
                 }
+                else
+                {
+                    size_t bodySize = 8 * arg.countForArray;
+                    needSize += bodySize;
+                    if (size < needSize)
+                    {
+                        break;
+                    }
+
+                    arg.uint64Values = (uint64_t*)now;
+                    now += bodySize;
+                }
+
+                args.push_back(arg);
+                ret2 = true;
+                break;
+            }
             } /* end of switch () */
 
             if (!ret2)
@@ -746,9 +732,7 @@ CRpcPacket::PushArgument(RPC_ARGUMENT                 arg,
     case RPC_DT_UINT64:
     case RPC_DT_FLOAT32:
     case RPC_DT_FLOAT64:
-        {
-            break;
-        }
+        break;
     case RPC_DT_BOOL8ARRAY:
     case RPC_DT_INT8ARRAY:
     case RPC_DT_UINT8ARRAY:
@@ -760,19 +744,15 @@ CRpcPacket::PushArgument(RPC_ARGUMENT                 arg,
     case RPC_DT_UINT64ARRAY:
     case RPC_DT_FLOAT32ARRAY:
     case RPC_DT_FLOAT64ARRAY:
+        if (arg.countForArray > 0 && arg.uint64Values == NULL)
         {
-            if (arg.countForArray > 0 && arg.uint64Values == NULL)
-            {
-                ret = false;
-            }
-            break;
-        }
-    default:
-        {
-            assert(0);
             ret = false;
-            break;
         }
+        break;
+    default:
+        assert(0);
+        ret = false;
+        break;
     } /* end of switch () */
 
     if (ret)
@@ -875,145 +855,139 @@ CRpcPacket::EndPushArgument()
         case RPC_DT_BOOL8:
         case RPC_DT_INT8:
         case RPC_DT_UINT8:
-            {
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                break;
-            }
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            break;
         case RPC_DT_INT16:
         case RPC_DT_UINT16:
+        {
+            if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
             {
-                if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
-                {
-                    Reverse16_i(dstArg.uint16Value);
-                    dstArg.bigEndian_r = bigEndian;
-                }
-
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                srcArg = dstArg;
-                break;
+                Reverse16_i(dstArg.uint16Value);
+                dstArg.bigEndian_r = bigEndian;
             }
+
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            srcArg = dstArg;
+            break;
+        }
         case RPC_DT_INT32:
         case RPC_DT_UINT32:
         case RPC_DT_FLOAT32:
+        {
+            if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
             {
-                if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
-                {
-                    Reverse32_i(dstArg.uint32Value);
-                    dstArg.bigEndian_r = bigEndian;
-                }
-
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                srcArg = dstArg;
-                break;
+                Reverse32_i(dstArg.uint32Value);
+                dstArg.bigEndian_r = bigEndian;
             }
+
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            srcArg = dstArg;
+            break;
+        }
         case RPC_DT_INT64:
         case RPC_DT_UINT64:
         case RPC_DT_FLOAT64:
+        {
+            if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
             {
-                if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
-                {
-                    Reverse64_i(dstArg.uint64Value);
-                    dstArg.bigEndian_r = bigEndian;
-                }
-
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                srcArg = dstArg;
-                break;
+                Reverse64_i(dstArg.uint64Value);
+                dstArg.bigEndian_r = bigEndian;
             }
+
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            srcArg = dstArg;
+            break;
+        }
         case RPC_DT_BOOL8ARRAY:
         case RPC_DT_INT8ARRAY:
         case RPC_DT_UINT8ARRAY:
+        {
+            dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            dstArg.countForArray = srcArg.countForArray;
+
+            if (srcArg.countForArray > 0)
             {
-                dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                dstArg.countForArray = srcArg.countForArray;
-
-                if (srcArg.countForArray > 0)
-                {
-                    memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint8Values,
-                        1 * srcArg.countForArray);
-                    dstArg.uint8Values = (unsigned char*)(now + sizeof(RPC_ARGUMENT));
-                }
-
-                srcArg = dstArg;
-                break;
+                memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint8Values,
+                    1 * srcArg.countForArray);
+                dstArg.uint8Values = (unsigned char*)(now + sizeof(RPC_ARGUMENT));
             }
+
+            srcArg = dstArg;
+            break;
+        }
         case RPC_DT_INT16ARRAY:
         case RPC_DT_UINT16ARRAY:
+        {
+            dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            dstArg.countForArray = srcArg.countForArray;
+
+            if (srcArg.countForArray > 0)
             {
-                dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                dstArg.countForArray = srcArg.countForArray;
+                memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint16Values,
+                    2 * srcArg.countForArray);
+                dstArg.uint16Values = (uint16_t*)(now + sizeof(RPC_ARGUMENT));
 
-                if (srcArg.countForArray > 0)
+                if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
                 {
-                    memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint16Values,
-                        2 * srcArg.countForArray);
-                    dstArg.uint16Values = (uint16_t*)(now + sizeof(RPC_ARGUMENT));
-
-                    if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
-                    {
-                        Reverse16s_i((uint16_t*)dstArg.uint16Values, dstArg.countForArray);
-                        dstArg.bigEndian_r = bigEndian;
-                    }
+                    Reverse16s_i((uint16_t*)dstArg.uint16Values, dstArg.countForArray);
+                    dstArg.bigEndian_r = bigEndian;
                 }
-
-                srcArg = dstArg;
-                break;
             }
+
+            srcArg = dstArg;
+            break;
+        }
         case RPC_DT_INT32ARRAY:
         case RPC_DT_UINT32ARRAY:
         case RPC_DT_FLOAT32ARRAY:
+        {
+            dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            dstArg.countForArray = srcArg.countForArray;
+
+            if (srcArg.countForArray > 0)
             {
-                dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                dstArg.countForArray = srcArg.countForArray;
+                memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint32Values, 4 * srcArg.countForArray);
+                dstArg.uint32Values = (uint32_t*)(now + sizeof(RPC_ARGUMENT));
 
-                if (srcArg.countForArray > 0)
+                if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
                 {
-                    memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint32Values,
-                        4 * srcArg.countForArray);
-                    dstArg.uint32Values = (uint32_t*)(now + sizeof(RPC_ARGUMENT));
-
-                    if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
-                    {
-                        Reverse32s_i((uint32_t*)dstArg.uint32Values, dstArg.countForArray);
-                        dstArg.bigEndian_r = bigEndian;
-                    }
+                    Reverse32s_i((uint32_t*)dstArg.uint32Values, dstArg.countForArray);
+                    dstArg.bigEndian_r = bigEndian;
                 }
-
-                srcArg = dstArg;
-                break;
             }
+
+            srcArg = dstArg;
+            break;
+        }
         case RPC_DT_INT64ARRAY:
         case RPC_DT_UINT64ARRAY:
         case RPC_DT_FLOAT64ARRAY:
-            {
-                dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
-                memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
-                dstArg.countForArray = srcArg.countForArray;
+        {
+            dstArg.countForArray = pbsd_hton32(dstArg.countForArray);
+            memcpy(now, &dstArg, sizeof(RPC_ARGUMENT));
+            dstArg.countForArray = srcArg.countForArray;
 
-                if (srcArg.countForArray > 0)
+            if (srcArg.countForArray > 0)
+            {
+                memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint64Values, 8 * srcArg.countForArray);
+                dstArg.uint64Values = (uint64_t*)(now + sizeof(RPC_ARGUMENT));
+
+                if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
                 {
-                    memcpy(now + sizeof(RPC_ARGUMENT), srcArg.uint64Values,
-                        8 * srcArg.countForArray);
-                    dstArg.uint64Values = (uint64_t*)(now + sizeof(RPC_ARGUMENT));
-
-                    if (m_convertByteOrder && dstArg.bigEndian_r != bigEndian)
-                    {
-                        Reverse64s_i((uint64_t*)dstArg.uint64Values, dstArg.countForArray);
-                        dstArg.bigEndian_r = bigEndian;
-                    }
+                    Reverse64s_i((uint64_t*)dstArg.uint64Values, dstArg.countForArray);
+                    dstArg.bigEndian_r = bigEndian;
                 }
+            }
 
-                srcArg = dstArg;
-                break;
-            }
+            srcArg = dstArg;
+            break;
+        }
         default:
-            {
-                assert(0);
-                break;
-            }
+            assert(0);
+            break;
         } /* end of switch () */
 
         now += naluSizes[i];
@@ -1054,10 +1028,8 @@ CheckRpcDataType(RPC_DATA_TYPE type)
     case RPC_DT_UINT64ARRAY:
     case RPC_DT_FLOAT32ARRAY:
     case RPC_DT_FLOAT64ARRAY:
-        {
-            ret = true;
-            break;
-        }
+        ret = true;
+        break;
     }
 
     return ret;

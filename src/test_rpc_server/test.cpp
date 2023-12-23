@@ -236,15 +236,11 @@ CTest::OnRpcRequest(IRpcServer* server,
     switch (request->GetFunctionId())
     {
     case RPC_FUNCTION_ID1:
-        {
-            Test1_req(server, request);
-            break;
-        }
+        Test1_req(server, request);
+        break;
     case RPC_FUNCTION_ID2:
-        {
-            Test2_req(server, request);
-            break;
-        }
+        Test2_req(server, request);
+        break;
     }
 }
 
