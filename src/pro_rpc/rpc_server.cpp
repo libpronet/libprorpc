@@ -102,6 +102,7 @@ CRpcServer::~CRpcServer()
 bool
 CRpcServer::Init(IRpcServerObserver* observer,
                  IProReactor*        reactor,
+                 const char*         argv0,          /* = NULL */
                  const char*         configFileName,
                  RTP_MM_TYPE         mmType,         /* = 0 */
                  unsigned short      serviceHubPort) /* = 0 */
@@ -116,7 +117,7 @@ CRpcServer::Init(IRpcServerObserver* observer,
     }
 
     char exeRoot[1024] = "";
-    ProGetExeDir_(exeRoot);
+    ProGetExeDir_(exeRoot, argv0);
 
     CProStlString configFileName2 = configFileName;
     if (configFileName2[0] == '.' ||
@@ -151,7 +152,7 @@ CRpcServer::Init(IRpcServerObserver* observer,
             return false;
         }
 
-        if (!CMsgServer::Init(reactor, configFileName, mmType, serviceHubPort))
+        if (!CMsgServer::Init(reactor, argv0, configFileName, mmType, serviceHubPort))
         {
             goto EXIT;
         }

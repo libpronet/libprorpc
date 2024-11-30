@@ -52,7 +52,8 @@ CTest::~CTest()
 }
 
 bool
-CTest::Init(IProReactor* reactor)
+CTest::Init(IProReactor* reactor,
+            const char*  argv0) /* = NULL */
 {
     assert(reactor != NULL);
     if (reactor == NULL)
@@ -70,7 +71,7 @@ CTest::Init(IProReactor* reactor)
             return false;
         }
 
-        m_server = CreateRpcServer(this, reactor, "rpc_server.cfg", 0, 0);
+        m_server = CreateRpcServer(this, reactor, argv0, "rpc_server.cfg", 0, 0);
         if (m_server == NULL)
         {
             return false;

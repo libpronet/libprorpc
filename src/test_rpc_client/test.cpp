@@ -54,7 +54,8 @@ CTest::~CTest()
 }
 
 bool
-CTest::Init(IProReactor* reactor)
+CTest::Init(IProReactor* reactor,
+            const char*  argv0) /* = NULL */
 {
     assert(reactor != NULL);
     if (reactor == NULL)
@@ -75,6 +76,7 @@ CTest::Init(IProReactor* reactor)
         m_client = CreateRpcClient(
             this,
             reactor,
+            argv0,
             "rpc_client.cfg",
             0,    /* mmType */
             NULL, /* serverIp */

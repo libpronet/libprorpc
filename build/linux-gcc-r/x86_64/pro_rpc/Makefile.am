@@ -12,29 +12,24 @@ libpro_rpc_so_SOURCES = ../../../../src/pro_rpc/pro_rpc.cpp    \
                         ../../../../src/pro_rpc/rpc_packet.cpp \
                         ../../../../src/pro_rpc/rpc_server.cpp
 
-libpro_rpc_so_CPPFLAGS = -DPRO_RPC_EXPORTS              \
-                         -I/usr/local/libpronet/include \
-                         -I/usr/local/libpromsg/include
+libpro_rpc_so_CPPFLAGS = -DPRO_RPC_EXPORTS             \
+                         -I${prefix}/libpronet/include \
+                         -I${prefix}/libpromsg/include
 
 libpro_rpc_so_CFLAGS   = -fPIC
 libpro_rpc_so_CXXFLAGS = -fPIC
 
-libpro_rpc_so_LDFLAGS = -shared -Wl,-soname,libpro_rpc.so     \
-                        -Wl,-rpath,.:/usr/local/libpronet/lib \
-                        -Wl,--no-undefined
+libpro_rpc_so_LDFLAGS = -shared -Wl,-soname,libpro_rpc.so \
+                        -Wl,-rpath,.:${prefix}/libpronet/lib -Wl,--no-undefined
 libpro_rpc_so_LDADD   =
 
-LIBS = -L/usr/local/libpronet/lib \
-       -L/usr/local/libpromsg/lib \
-       -lpro_msg                  \
-       -lpro_rtp                  \
-       -lpro_net                  \
-       -lpro_util                 \
-       -lpro_shared               \
-       -lmbedtls                  \
-       -lstdc++                   \
-       -lrt                       \
-       -lpthread                  \
-       -lm                        \
-       -lgcc                      \
+LIBS = -L${prefix}/libpronet/lib \
+       -L${prefix}/libpromsg/lib \
+       -lpro_msg                 \
+       -lpro_rtp                 \
+       -lpro_net                 \
+       -lpro_util                \
+       -lpro_shared              \
+       -lmbedtls                 \
+       -lpthread                 \
        -lc

@@ -116,6 +116,10 @@ public:
 
     virtual int64_t GetMagic2() const;
 
+    virtual void SetMagicStr(const char* magicStr);
+
+    virtual const char* GetMagicStr() const;
+
     /*
      * [[[[ push arguments
      */
@@ -156,6 +160,7 @@ private:
     uint64_t                    m_clientId;
     int64_t                     m_magic1;
     int64_t                     m_magic2;
+    CProStlString               m_magicStr;
 
     RPC_HDR                     m_hdr;
     CProStlVector<RPC_ARGUMENT> m_args;

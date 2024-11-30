@@ -701,6 +701,18 @@ CRpcPacket::GetMagic2() const
 }
 
 void
+CRpcPacket::SetMagicStr(const char* magicStr)
+{
+    m_magicStr = magicStr != NULL ? magicStr : "";
+}
+
+const char*
+CRpcPacket::GetMagicStr() const
+{
+    return m_magicStr.c_str();
+}
+
+void
 CRpcPacket::CleanAndBeginPushArgument()
 {
     m_args.clear();

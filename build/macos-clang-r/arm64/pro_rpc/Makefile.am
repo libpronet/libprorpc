@@ -19,8 +19,7 @@ libpro_rpc_so_CPPFLAGS = -DPRO_RPC_EXPORTS             \
 libpro_rpc_so_CFLAGS   = -fPIC
 libpro_rpc_so_CXXFLAGS = -fPIC
 
-libpro_rpc_so_LDFLAGS = -shared -Wl,-soname,libpro_rpc.so \
-                        -Wl,-rpath,.:${prefix}/libpronet/lib -Wl,--no-undefined
+libpro_rpc_so_LDFLAGS = -shared -Wl,-rpath,.:${prefix}/libpronet/lib
 libpro_rpc_so_LDADD   =
 
 LIBS = -L${prefix}/libpronet/lib \

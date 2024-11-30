@@ -37,7 +37,10 @@ public:
 
     static CTest* CreateInstance();
 
-    bool Init(IProReactor* reactor);
+    bool Init(
+        IProReactor* reactor,
+        const char*  argv0 /* = NULL */
+        );
 
     void Fini();
 

@@ -13,8 +13,7 @@ test_rpc_client_CPPFLAGS = -I${prefix}/libpronet/include
 test_rpc_client_CFLAGS   =
 test_rpc_client_CXXFLAGS =
 
-test_rpc_client_LDFLAGS = -Wl,-rpath,.:../lib:${prolibdir}:${prefix}/libpronet/lib \
-                          -Wl,--no-undefined
+test_rpc_client_LDFLAGS = -Wl,-rpath,.:../lib:${prolibdir}:${prefix}/libpronet/lib
 test_rpc_client_LDADD   =
 
 LIBS = ../pro_rpc/libpro_rpc.so  \

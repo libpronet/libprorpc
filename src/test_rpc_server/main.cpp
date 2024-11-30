@@ -71,7 +71,7 @@ int main(int argc, char* argv[])
 
         goto EXIT;
     }
-    if (!tester->Init(reactor))
+    if (!tester->Init(reactor, argv[0]))
     {
         printf("\n test_rpc_server --- error! can't init tester. [cfg?] \n");
 

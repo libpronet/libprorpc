@@ -439,6 +439,10 @@ public:
     virtual void SetMagic2(int64_t magic2) = 0;
 
     virtual int64_t GetMagic2() const = 0;
+
+    virtual void SetMagicStr(const char* magicStr) = 0;
+
+    virtual const char* GetMagicStr() const = 0;
 };
 
 /////////////////////////////////////////////////////////////////////////////
@@ -635,6 +639,7 @@ PRO_RPC_API
 IRpcClient*
 CreateRpcClient(IRpcClientObserver* observer,
                 IProReactor*        reactor,
+                const char*         argv0,      /* = NULL */
                 const char*         configFileName,
                 RTP_MM_TYPE         mmType,     /* = 0 */
                 const char*         serverIp,   /* = NULL */
@@ -647,6 +652,7 @@ PRO_RPC_API
 IRpcClient*
 CreateRpcClient2(IRpcClientObserver* observer,
                  IProReactor*        reactor,
+                 const char*         argv0,      /* = NULL */
                  const char*         configFileName,
                  RTP_MM_TYPE         mmType,     /* = 0 */
                  const char*         serverIp,   /* = NULL */
@@ -665,6 +671,7 @@ PRO_RPC_API
 IRpcServer*
 CreateRpcServer(IRpcServerObserver* observer,
                 IProReactor*        reactor,
+                const char*         argv0,           /* = NULL */
                 const char*         configFileName,
                 RTP_MM_TYPE         mmType,          /* = 0 */
                 unsigned short      serviceHubPort); /* = 0 */

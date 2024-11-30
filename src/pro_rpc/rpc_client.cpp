@@ -105,6 +105,7 @@ CRpcClient::~CRpcClient()
 bool
 CRpcClient::Init(IRpcClientObserver* observer,
                  IProReactor*        reactor,
+                 const char*         argv0,      /* = NULL */
                  const char*         configFileName,
                  RTP_MM_TYPE         mmType,     /* = 0 */
                  const char*         serverIp,   /* = NULL */
@@ -123,7 +124,7 @@ CRpcClient::Init(IRpcClientObserver* observer,
     }
 
     char exeRoot[1024] = "";
-    ProGetExeDir_(exeRoot);
+    ProGetExeDir_(exeRoot, argv0);
 
     CProStlString configFileName2 = configFileName;
     if (configFileName2[0] == '.' ||
@@ -159,8 +160,8 @@ CRpcClient::Init(IRpcClientObserver* observer,
             return false;
         }
 
-        if (!CMsgClient::Init(reactor, configFileName, mmType, serverIp, serverPort,
-            user, password, localIp))
+        if (!CMsgClient::Init(reactor, argv0, configFileName, mmType,
+            serverIp, serverPort, user, password, localIp))
         {
             goto EXIT;
         }

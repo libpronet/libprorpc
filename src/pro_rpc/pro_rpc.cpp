@@ -36,6 +36,7 @@ PRO_RPC_API
 IRpcClient*
 CreateRpcClient(IRpcClientObserver* observer,
                 IProReactor*        reactor,
+                const char*         argv0,      /* = NULL */
                 const char*         configFileName,
                 RTP_MM_TYPE         mmType,     /* = 0 */
                 const char*         serverIp,   /* = NULL */
@@ -52,7 +53,7 @@ CreateRpcClient(IRpcClientObserver* observer,
         return NULL;
     }
 
-    if (!client->Init(observer, reactor, configFileName, mmType,
+    if (!client->Init(observer, reactor, argv0, configFileName, mmType,
         serverIp, serverPort, user, password, localIp))
     {
         client->Release();
@@ -67,6 +68,7 @@ PRO_RPC_API
 IRpcClient*
 CreateRpcClient2(IRpcClientObserver* observer,
                  IProReactor*        reactor,
+                 const char*         argv0,      /* = NULL */
                  const char*         configFileName,
                  RTP_MM_TYPE         mmType,     /* = 0 */
                  const char*         serverIp,   /* = NULL */
@@ -85,7 +87,7 @@ CreateRpcClient2(IRpcClientObserver* observer,
         return NULL;
     }
 
-    if (!client->Init(observer, reactor, configFileName, mmType,
+    if (!client->Init(observer, reactor, argv0, configFileName, mmType,
         serverIp, serverPort, user, password, localIp))
     {
         client->Release();
@@ -114,6 +116,7 @@ PRO_RPC_API
 IRpcServer*
 CreateRpcServer(IRpcServerObserver* observer,
                 IProReactor*        reactor,
+                const char*         argv0,          /* = NULL */
                 const char*         configFileName,
                 RTP_MM_TYPE         mmType,         /* = 0 */
                 unsigned short      serviceHubPort) /* = 0 */
@@ -126,7 +129,7 @@ CreateRpcServer(IRpcServerObserver* observer,
         return NULL;
     }
 
-    if (!server->Init(observer, reactor, configFileName, mmType, serviceHubPort))
+    if (!server->Init(observer, reactor, argv0, configFileName, mmType, serviceHubPort))
     {
         server->Release();
 

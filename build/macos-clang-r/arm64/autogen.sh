@@ -23,8 +23,8 @@ CPPFLAGS="-DNDEBUG          \
           -D_GNU_SOURCE     \
           -D_LIBC_REENTRANT \
           -D_REENTRANT"     \
-CFLAGS="  -std=c++11 -O2 -Wall -fno-strict-aliasing -fvisibility=hidden -march=pentium4 -m32" \
-CXXFLAGS="-std=c++11 -O2 -Wall -fno-strict-aliasing -fvisibility=hidden -march=pentium4 -m32" \
+CFLAGS="             -O2 -Wall -fno-strict-aliasing -fvisibility=hidden -march=armv8-a -m64" \
+CXXFLAGS="-std=c++11 -O2 -Wall -fno-strict-aliasing -fvisibility=hidden -march=armv8-a -m64" \
 LDFLAGS="" $@
 
 rm -f ./configure
