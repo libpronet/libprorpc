@@ -52,12 +52,15 @@ struct RPC_HDR2 : public RPC_HDR
 {
     RPC_HDR2()
     {
+        memset(this, 0, sizeof(RPC_HDR));
+
         magic1 = 0;
         magic2 = 0;
     }
 
-    int64_t magic1;
-    int64_t magic2;
+    int64_t       magic1;
+    int64_t       magic2;
+    CProStlString magicStr;
 
     DECLARE_SGI_POOL(0)
 };

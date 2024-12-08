@@ -440,11 +440,11 @@ CRpcClient::SendRpcRequest(IRpcPacket*  request,
         if (!noreply)
         {
             RPC_HDR2 hdr;
-            memset(&hdr, 0, sizeof(RPC_HDR2));
             hdr.requestId  = request->GetRequestId();
             hdr.functionId = request->GetFunctionId();
             hdr.magic1     = request->GetMagic1();
             hdr.magic2     = request->GetMagic2();
+            hdr.magicStr   = request->GetMagicStr();
 
             uint64_t timerId = m_reactor->SetupTimer(
                 this, (uint64_t)rpcTimeoutInSeconds * 1000, 0);
@@ -762,6 +762,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             result->SetRpcCode(hdr.rpcCode);
             result->SetMagic1(hdr2.magic1);
             result->SetMagic2(hdr2.magic2);
+            result->SetMagicStr(hdr2.magicStr.c_str());
 
             if (args.size() > 0)
             {
@@ -798,6 +799,7 @@ CRpcClient::RecvRpc(IRtpMsgClient*                     msgClient,
             result->SetRpcCode(hdr.rpcCode);
             result->SetMagic1(hdr2.magic1);
             result->SetMagic2(hdr2.magic2);
+            result->SetMagicStr(hdr2.magicStr.c_str());
         }
 
         m_observer->AddRef();
@@ -928,6 +930,7 @@ CRpcClient::OnCloseMsg(IRtpMsgClient* msgClient,
         result->SetRpcCode(RPCE_NETWORK_BROKEN);
         result->SetMagic1(hdr.magic1);
         result->SetMagic2(hdr.magic2);
+        result->SetMagicStr(hdr.magicStr.c_str());
 
         observer->OnRpcResult(this, result);
     }
@@ -988,6 +991,7 @@ CRpcClient::OnTimer(void*    factory,
     result->SetRpcCode(RPCE_NETWORK_TIMEOUT);
     result->SetMagic1(hdr.magic1);
     result->SetMagic2(hdr.magic2);
+    result->SetMagicStr(hdr.magicStr.c_str());
 
     observer->OnRpcResult(this, result);
     observer->Release();
