@@ -170,7 +170,10 @@ private:
         RPC_ERROR_CODE rpcCode
         );
 
-    void AsyncRecvRpc(int64_t* args);
+    void AsyncRecvRpc(
+        CRpcPacket* request,
+        int64_t     arrivalTick
+        );
 
 private:
 

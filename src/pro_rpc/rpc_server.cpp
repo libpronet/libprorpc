@@ -39,8 +39,6 @@ static const unsigned char C2S_CID    = 255;
 static const unsigned char RPC_CID    = 2;
 static const uint16_t      RPC_IID    = 1;
 
-typedef void (CRpcServer::* ACTION)(int64_t*);
-
 /////////////////////////////////////////////////////////////////////////////
 ////
 
@@ -694,23 +692,20 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
             return;
         }
 
-        IProFunctorCommand* command =
-            CProFunctorCommand_cpp<CRpcServer, ACTION>::CreateInstance(
-                *this,
-                &CRpcServer::AsyncRecvRpc,
-                (int64_t)request,
-                (int64_t)ProGetTickCount64() /* arrival time */
-                );
+        CProFunctorCommand* command = CProFunctorCommand::Create(
+            *this,
+            &CRpcServer::AsyncRecvRpc,
+            request,
+            ProGetTickCount64() /* arrival time */
+            );
         m_taskPool->Put(srcClientId, command);
     }
 }
 
 void
-CRpcServer::AsyncRecvRpc(int64_t* args)
+CRpcServer::AsyncRecvRpc(CRpcPacket* request,
+                         int64_t     arrivalTick)
 {
-    CRpcPacket* request     = (CRpcPacket*)args[0];
-    int64_t     arrivalTick =              args[1];
-
     /*
      * check timeout
      */
