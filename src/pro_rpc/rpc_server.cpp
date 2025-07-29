@@ -22,7 +22,6 @@
 #include "promsg/msg_server.h"
 #include "pronet/pro_channel_task_pool.h"
 #include "pronet/pro_config_file.h"
-#include "pronet/pro_functor_command.h"
 #include "pronet/pro_memory_pool.h"
 #include "pronet/pro_stl.h"
 #include "pronet/pro_thread_mutex.h"
@@ -692,13 +691,13 @@ CRpcServer::RecvRpc(IRtpMsgServer*                     msgServer,
             return;
         }
 
-        CProFunctorCommand* command = CProFunctorCommand::Create(
+        m_taskPool->PostCall(
+            srcClientId,
             *this,
             &CRpcServer::AsyncRecvRpc,
             request,
             ProGetTickCount64() /* arrival time */
             );
-        m_taskPool->Put(srcClientId, command);
     }
 }
 
